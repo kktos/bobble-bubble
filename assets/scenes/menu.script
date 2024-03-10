@@ -1,0 +1,16 @@
+display "menu" {
+	background #000
+	showCursor
+	font "bubble-bobble"
+
+	layout {
+		align center
+
+		color white
+
+		size 4
+		text "BUBBLE BOBBLE" at:300,146 color:#333333
+		text "BUBBLE BOBBLE" at:298,144
+
+	}
+}
