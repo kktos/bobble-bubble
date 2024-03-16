@@ -6,8 +6,9 @@ export default class BackgroundLayer extends Layer {
 	// static SPRITES= ["normal-0", "normal-1", "normal-2", "normal-3", "normal-4"];
 	// static DARK_SPRITES= ["dark-0", "dark-1", "dark-2", "dark-3", "dark-4"];
 
-	constructor(gc, id, withShadows= false) {
-		super(gc);
+	constructor(gc, parent, id, withShadows= false) {
+		super(gc, parent);
+
 		this.id= id;
 		this.type= typeof id === "string" ? "color" : "tile";
 

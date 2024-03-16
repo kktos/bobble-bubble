@@ -68,7 +68,13 @@ export class SheetParser extends EmbeddedActionsParser {
 	  return { name: "font", value };
     });
 
-	$.RULE("number", () => parseInt($.CONSUME(tokens.Integer).image));
+	$.RULE("number", () => {
+		const isNegative= $.OPTION(() => $.CONSUME(tokens.Minus));
+
+		const numberStr= $.CONSUME(tokens.Integer).image;
+
+		return Number.parseInt(numberStr) * (isNegative ? -1 : 1);
+	});
 
     $.RULE("htmlColor", () => {
 		const colorName= () => $.CONSUME(tokens.Identifier).image;

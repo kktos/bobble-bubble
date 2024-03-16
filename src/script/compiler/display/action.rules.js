@@ -4,11 +4,14 @@ export function actionRules(parser) {
 	const  $ = parser;
 
     $.RULE("layoutAction", () => {
-		const result= [];
-
 		$.CONSUME(tokens.Action);
-
 		$.CONSUME(tokens.Colon);
+
+		return $.SUBRULE(parser.layoutActionBlock);
+    });
+
+    $.RULE("layoutActionBlock", () => {
+		const result= [];
 
 		$.CONSUME(tokens.OpenCurly);
 

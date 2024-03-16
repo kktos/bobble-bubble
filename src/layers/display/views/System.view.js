@@ -1,6 +1,9 @@
 
-import Scene from "../../scene/Scene.js";
-import LocalDB from "../../utils/storage.util.js";
+import BubbleEntity from "../../../entities/bubble.entity.js";
+import { entityClasses } from "../../../entities/entities.js";
+import Scene from "../../../scene/Scene.js";
+import LocalDB from "../../../utils/storage.util.js";
+import EntitiesLayer from "../../entities.layer.js";
 
 export class System {
 
@@ -35,5 +38,15 @@ export class System {
 		this.vars.set(str, value);
 
 	}
-	
+
+	spawn(name, x , y, anim) {
+		if(entityClasses[name]) {
+			const entity= new entityClasses[name](this.gc.resourceManager, x, y);
+			this.layer.scene.addTask(EntitiesLayer.TASK_ADD_ENTITY, entity);
+		}
+	}
+
+	timerStop(name) {
+		this.layer.timers.stop(name);
+	}
 }

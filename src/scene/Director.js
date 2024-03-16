@@ -80,7 +80,7 @@ export default class Director {
     update(gc) {
         if(!this.currentScene?.isRunning)
             return;
-        this.currentScene.update(gc);
-        this.currentScene.render(gc);
+        this.currentScene?.update(gc);
+        this.currentScene?.render(gc);
     }
 }

@@ -1,6 +1,7 @@
 import Anim from "./anim.js";
 import ENV from "./env.js";
-import createSpriteSheet from "./utils/createspritesheet.util.js";
+import { drawZoomedImage } from "./utils/canvas.utils.js";
+import createSpriteSheet from "./utils/createSpriteSheet.util.js";
 import {loadImage, loadJson} from "./utils/loaders.util.js";
 
 export default class SpriteSheet {
@@ -15,31 +16,50 @@ export default class SpriteSheet {
 
 	constructor(img) {
 		this.img= img;
+
+		const canvas= document.createElement('canvas');
+		canvas.width= img.width;
+		canvas.height= img.height;
+
+		const ctx= canvas.getContext('2d');
+		ctx.imageSmoothingEnabled= false;
+		ctx.drawImage(img, 0, 0);
+
+		this.data= {
+			imgData: ctx.getImageData(0, 0, img.width, img.height).data,
+			width: img.width
+		};
+
 		this.sprites= new Map();
 		this.animations= new Map();
 	}	
 
-	define(name, x, y, w, h, {flip, scale}={}) {
+	define(name, x, y, w, h, {flip, scale= 1}={}) {
         const sprites= [false, true].map(flip => {
             const canvas= document.createElement('canvas');
             const ctx= canvas.getContext('2d');
 			ctx.imageSmoothingEnabled= false;
 
+			if(scale) {
+				// ctx.scale(scale, scale);
+				canvas.width= w*scale;
+				canvas.height= h*scale;
+				drawZoomedImage(this.data, ctx, scale, {x, y, w:canvas.width, h:canvas.height});
+				return canvas;
+			}
+
 			canvas.width= w;
             canvas.height= h;
-
-			if(scale)
-				ctx.scale(scale, scale);
 
             if (flip) {
                 ctx.scale(-1, 1);
                 ctx.translate(-w, 0);
             }
 
-            ctx.drawImage(
-                this.img,
-                x, y, w, h,
-                0, 0, w, h);
+			ctx.drawImage(
+				this.img,
+				x, y, w, h,
+				0, 0, w, h);
 
             return canvas;
         });

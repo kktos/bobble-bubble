@@ -1,4 +1,5 @@
 import { tokens } from "../lexer.js";
+import { defAnimRules } from "./defanim.rules.js";
 import { forRules } from "./for.rules.js";
 import { menuRules } from "./menu.rules.js";
 import { rectRules } from "./rect.rules.js";
@@ -11,6 +12,7 @@ import { viewRules } from "./view.rules.js";
 const NUMBER= 1;
 const ALIGN= 2;
 const COLOR= 3;
+const ANIM= 4;
 
 export function layoutRules(parser) {
 	const  $ = parser;
@@ -64,6 +66,7 @@ export function layoutRules(parser) {
 			{ ALT:() => $.SUBRULE(parser.layoutRepeat, { ARGS: [options] }) },
 			{ ALT:() => $.SUBRULE(parser.layoutView, { ARGS: [options] }) },
 			{ ALT:() => $.SUBRULE(parser.layoutRect, { ARGS: [options] }) },
+			{ ALT:() => $.SUBRULE(parser.layoutDefAnim, { ARGS: [options] }) },
 		]);
     });
 
@@ -74,6 +77,7 @@ export function layoutRules(parser) {
 			{ ALT: () => { propType= NUMBER; return $.CONSUME(tokens.Size); } },
 			{ ALT: () => { propType= NUMBER; return $.CONSUME(tokens.Zoom); } },
 			{ ALT: () => { propType= COLOR; return $.CONSUME(tokens.Color); } },
+			{ ALT: () => { propType= ANIM; return $.CONSUME(tokens.Anim); } },
 		]).image;
 
 		let isParm= false;
@@ -89,7 +93,13 @@ export function layoutRules(parser) {
 			{ ALT: () => { valueType= COLOR; value= $.SUBRULE(parser.htmlColor); } },
 			{ ALT: () => { valueType= ALIGN; $.CONSUME(tokens.Left); value= 1; } },
 			{ ALT: () => { valueType= ALIGN; $.CONSUME(tokens.Right); value= 3; } },
-			{ ALT: () => { valueType= ALIGN; $.CONSUME(tokens.Center); value= 2; } }
+			{ ALT: () => { valueType= ALIGN; $.CONSUME(tokens.Center); value= 2; } },
+			{ ALT: () => { 
+				valueType= ANIM; 
+				value= {
+					name: $.CONSUME(tokens.StringLiteral).payload
+				} 
+			} },
 		])
 
 		$.ACTION(() => {
@@ -104,6 +114,10 @@ export function layoutRules(parser) {
 					break;
 				case NUMBER:
 					if(valueType!==NUMBER)
+						throw new TypeError(`Invalid value ${value} for ${name}`);
+					break;
+				case ANIM:
+					if(valueType!==ANIM)
 						throw new TypeError(`Invalid value ${value} for ${name}`);
 					break;
 			}
@@ -130,4 +144,5 @@ export function layoutRules(parser) {
 	repeatRules(parser);
 	viewRules(parser);
 	rectRules(parser);
+	defAnimRules(parser);
 }

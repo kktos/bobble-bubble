@@ -3,10 +3,9 @@ import Layer from "./layer.js";
 
 export default class UILayer extends Layer {
 	
-	constructor(gc, layout) {
-		super(gc);
+	constructor(gc, parent, layout) {
+		super(gc, parent);
 
-		this.gc= gc;
 		this.ui= document.getElementById("ui");
 		if(layout) {
 			this.ui.className= layout.pos === "top" ? "top":"bottom";

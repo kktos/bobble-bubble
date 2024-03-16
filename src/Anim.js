@@ -6,7 +6,7 @@ export default class Anim {
 		this.name= name;
 		this.events= new EventEmitter();
 
-		this.loop= sheet.loop || Infinity;
+		this.loop= sheet.loop || Number.POSITIVE_INFINITY;
 		this.len= sheet.len;
 		this.frames= [];
 		if(Array.isArray(sheet.frames))

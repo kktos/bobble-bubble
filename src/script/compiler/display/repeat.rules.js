@@ -78,6 +78,7 @@ export function repeatRules(parser) {
 		$.AT_LEAST_ONE(() => {
 			const item= $.OR([
 				{ ALT: () => $.SUBRULE(parser.layoutText, { ARGS: [options, isMenuItem] }) },
+				{ ALT: () => $.SUBRULE(parser.layoutSprite, { ARGS: [options] }) },
 				{ ALT: () => $.SUBRULE(parser.layoutMenuItem, { ARGS: [options] }) },
 			])
 			items.push( item );

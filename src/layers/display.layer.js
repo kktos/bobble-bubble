@@ -1,20 +1,19 @@
 import ENV from "../env.js";
 import { growRect, ptInRect } from "../math.js";
+import { execAction } from "../script/engine/exec.script.js";
+import { hexToRgb } from "../utils/canvas.utils.js";
 import {clone} from "../utils/object.util.js";
 import LocalDB from "../utils/storage.util.js";
 import UILayer from "./UILayer.js";
-import { SYSTEM, initViews, views } from "./views/views.js";
-
-const loadSprite= ({resourceManager}, name) => {
-	const [sheet, sprite]= name.split(":");
-	const ss= resourceManager.get("sprite", sheet);
-	return { ss,sprite };
-}
+import { loadSprite, renderSprite } from "./display/sprite.renderer.js";
+import Timers from "./display/timers.class.js";
+import { initViews, views } from "./display/views/views.js";
 
 export default class DisplayLayer extends UILayer {
+	static EVENT_TIME_OUT = "TIME_OUT";
 
-	constructor(gc, sheet) {
-		super(gc, sheet.ui);
+	constructor(gc, parent, sheet) {
+		super(gc, parent, sheet.ui);
 
 		const rezMgr= gc.resourceManager;
 		this.font= rezMgr.get("font", sheet.font ?? ENV.MAIN_FONT);
@@ -40,6 +39,20 @@ export default class DisplayLayer extends UILayer {
 		initViews({gc, vars: this.vars, layer: this});
 
 		this.prepareRendering(gc);
+
+		this.timers= Timers.createTimers(sheet);
+
+		if(sheet.on) {
+			for (const [name, value] of Object.entries(sheet.on)) {
+				const [id, eventName]= name.split(":");
+				parent.events.on(eventName, (...args) => {
+					if(args[0] !== id)
+						return;
+					execAction(gc, value.action);
+				});
+			}
+
+		}
 
 	}
 
@@ -203,6 +216,10 @@ export default class DisplayLayer extends UILayer {
 		for(let idx= 0; idx<this.layout.length; idx++) {
 			const op= this.layout[idx];
 			switch(op.type) {
+				case "anim": {
+					this.vars.set(op.name, op);
+					break;
+				}
 				case "set":
 					this.vars.set(op.name, op.value);
 					break;
@@ -268,7 +285,7 @@ export default class DisplayLayer extends UILayer {
 				if(this.isMouseEnabled && this.menu) {
 					const menuIdx= this.findMenuByPoint(e.x, e.y);
 					if(menuIdx>=0)
-						this.exec(gc, menuIdx);
+						this.execMenuItemAction(gc, menuIdx);
 				}
 				break;
 
@@ -283,7 +300,7 @@ export default class DisplayLayer extends UILayer {
 
 			case "joybuttondown":
 				if(e.X || e.TRIGGER_RIGHT)
-					return this.exec(gc);
+					return this.execMenuItemAction(gc);
 				if(e.CURSOR_UP)
 					return this.menuMoveUp();
 				if(e.CURSOR_DOWN)
@@ -322,7 +339,7 @@ export default class DisplayLayer extends UILayer {
 						this.menuMoveUp();
 						break;
 					case "Enter":
-						this.exec(gc);
+						this.execMenuItemAction(gc);
 						break;
 				}
 				break;
@@ -344,7 +361,7 @@ export default class DisplayLayer extends UILayer {
 		}
 	}
 
-	exec(gc, idx= null) {
+	execMenuItemAction(gc, idx= null) {
 		if(!this.menu)
 			return;
 
@@ -356,53 +373,7 @@ export default class DisplayLayer extends UILayer {
 			return;
 		}
 
-		for (let idx = 0; idx < menuItem.action.length; idx++) {
-			const fnCall = menuItem.action[idx];
-			const args= [];
-
-			for (let argsIdx = 0; argsIdx <fnCall.args.length; argsIdx++) {
-				const arg= fnCall.args[argsIdx]; 
-				if(typeof arg === "number") {
-					args.push(arg);
-					continue;
-				}
-				const strMatches = arg.match(/^"(.*)"$/);
-				if(strMatches) {
-					args.push(strMatches[1]);
-					continue;
-				}
-
-				const varMatches = arg.match(/^\$(.*)$/);
-				if(varMatches) {
-					const varname= varMatches[1];
-					if(!this.vars.has(varname))
-						throw new TypeError(`Unknown Variable "${varname}" !?!`);
-					args.push( this.vars.get(varname) );
-					continue;
-				}
-
-				args.push( arg );
-			}
-
-			let fn= fnCall.name.length === 1 ? views[SYSTEM] : null;
-			let self= fn;
-			for(let partIdx= 0; partIdx<fnCall.name.length; partIdx++) {
-				const part= fnCall.name[partIdx];
-				if(!self) {
-					self= this.vars.get(part);
-					fn= self;
-				} else {
-					fn= fn[part];
-				}
-				if(!fn) {
-					console.error("unknown action !", fnCall.name.join("."), args);
-					return;
-				}
-			}
-
-			fn.call(self, ...args);
-
-		}
+		execAction(gc, menuItem.action);
 
 	}
 
@@ -443,37 +414,35 @@ export default class DisplayLayer extends UILayer {
 		});
 	}
 
-	renderText({viewport:{ctx}}, op) {
+	renderText({deltaTime, viewport:{ctx}}, op) {
 		if(op.blink && this.blinkFlag)
 			return;
 		if(op.align)
 			this.font.align= op.align;
 		if(op.size)
 			this.font.size= op.size;
-		const text= this.eval(op.text);
-		return this.font.print(ctx, text===""? " ": text, op.pos[0], op.pos[1], op.color);
-	}
 
-	renderSprite({resourceManager, tick, viewport:{ctx}}, op) {
-		// const [sheet, sprite]= op.sprite.split(":");
-		// const ss= resourceManager.get("sprite", sheet);
-		const {ss, sprite}= loadSprite({resourceManager}, op.sprite);
-		const zoom= op.zoom || 1;
-		const [x, y]= op.pos;
-		let [countX, countY]= op.range || [1,1];
-		if(countX<=0)
-			countX= 1;
-		if(countY<=0)
-			countY= 1;
-		const animName= sprite.split("@");
-		if(animName.length>1)
-			ss.drawAnim(animName[1], ctx, x, y, tick/100, {zoom});
-		else {
-			const size= ss.spriteSize(sprite);
-			for(let col= 0; col< countX; col++) {
-				ss.draw(sprite, ctx, x+col*(size.x*zoom), y, {zoom});
+		if(op.anim) {
+			switch(op.anim.name) {
+				case "fadein":
+					if(!op.anim.state) {
+						op.anim.state= {
+							color: hexToRgb(op.color),
+							alpha: 0
+						};
+					}
+					op.anim.state.alpha+= deltaTime/3;
+					if(op.anim.state.alpha>255) {
+						op.anim= "none";
+						break;
+					}
+					op.color= `rgba(${op.anim.state.color[0]}, ${op.anim.state.color[1]}, ${op.anim.state.color[2]}, ${op.anim.state.alpha})`;
+					break;
 			}
 		}
+
+		const text= this.eval(op.text);
+		return this.font.print(ctx, text===""? " ": text, op.pos[0], op.pos[1], op.color);
 	}
 
 	renderMenu(gc, menu) {
@@ -486,7 +455,7 @@ export default class DisplayLayer extends UILayer {
 				if(menu.selection?.background) {
 					const selectRect= growRect(item.bbox, 2, 5);
 					ctx.fillStyle = menu.selection?.background;
-					ctx.fillRect(selectRect.x, selectRect.y, selectRect.width, selectRect.height);
+					ctx.fillRect(selectRect.x, selectRect.y, selectRect.width+2, selectRect.height-4);
 				} else {
 					ctx.strokeStyle= menu.selection?.color ?? ENV.COLORS.SELECT_RECT;
 					ctx.beginPath();
@@ -517,7 +486,7 @@ export default class DisplayLayer extends UILayer {
 					break;
 				}
 				case "sprite":
-					this.renderSprite(gc, item);
+					renderSprite(gc, this, item);
 					break;
 				case "group":
 					this.renderMenu(gc, item);
@@ -543,6 +512,10 @@ export default class DisplayLayer extends UILayer {
 		gc.viewport.ctx.drawImage(op.canvas, op.pos[0], op.pos[1]);
 	}
 
+	update(gc, scene) {
+		this.timers?.update(gc, scene);
+	}
+	
 	render(gc) {
 		const ctx= gc.viewport.ctx;
 
@@ -557,7 +530,7 @@ export default class DisplayLayer extends UILayer {
 					this.renderText(gc, op);
 					break;
 				case "sprite":
-					this.renderSprite(gc, op);
+					renderSprite(gc, this, op);
 					break;
 				case "menu":
 					this.renderMenu(gc, op);

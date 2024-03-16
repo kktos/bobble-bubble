@@ -41,7 +41,46 @@ export function drawPixelated(img, context, zoom, x=0, y=0) {
 	}
   }
 
-  export function createImgCanvas(img) {
+export function drawCropPixelated(img, context, zoom, srcRect, dstRect) {
+	if (!img.id) img.id = `__img${lastImageId++}`;
+
+	let idata = idataById[img.id];
+	if (!idata){
+	  const canvas = document.createElement('canvas');
+	  canvas.width  = img.width;
+	  canvas.height = img.height;
+	  const ctx = canvas.getContext('2d');
+	  ctx.drawImage(img,0,0);
+	  idata = idataById[img.id] = ctx.getImageData(srcRect.x,srcRect.y,srcRect.w,srcRect.h).data;
+	}
+	for (let x2=0;x2<img.width;++x2){
+	  for (let y2=0;y2<img.height;++y2){
+		const i=(y2*img.width+x2)*4;
+		const r=idata[i  ];
+		const g=idata[i+1];
+		const b=idata[i+2];
+		const a=idata[i+3];
+		context.fillStyle = `rgba(${r},${g},${b},${a/255})`;
+		context.fillRect(dstRect.x + x2*zoom, dstRect.y + y2*zoom, zoom, zoom);
+	  }
+	}
+}
+
+export function drawZoomedImage({imgData, width}, ctx, zoom, srcRect, x=0, y=0) {
+	for (let x2=0; x2<srcRect.w; ++x2){
+		for (let y2=0; y2<srcRect.h; ++y2) {
+			const i= ((y2 + srcRect.y) * width + (x2 + srcRect.x) )*4;
+			const r= imgData[i  ];
+			const g= imgData[i+1];
+			const b= imgData[i+2];
+			const a= imgData[i+3];
+			ctx.fillStyle = `rgba(${r},${g},${b},${a/255})`;
+			ctx.fillRect(x + x2*zoom, y + y2*zoom, zoom, zoom);
+		}
+	}
+}
+
+export function createImgCanvas(img) {
 	const canvas= document.createElement('canvas');
 	canvas.width= img.width;
 	canvas.height= img.height;
@@ -58,4 +97,11 @@ export function createFromSource(srcCtx, x, y, w, h) {
 	canvas.height = h;
 	ctx.putImageData(imgData, 0, 0);
 	return canvas;
+}
+
+export function hexToRgb(hex) {
+  return hex
+  	.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => `#${r}${r}${g}${g}${b}${b}`)
+    .substring(1).match(/.{2}/g)
+    .map(x => Number.parseInt(x, 16));
 }

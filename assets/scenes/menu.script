@@ -3,6 +3,12 @@ display "menu" {
 	showCursor
 	font "bubble-bobble"
 
+	// timer "spawner" 1
+
+	// on "TIME_OUT" {
+	// 	spawn("BubbleEntity", 300, 300)
+	// }
+
 	layout {
 		align center
 
@@ -11,6 +17,38 @@ display "menu" {
 		size 4
 		text "BUBBLE BOBBLE" at:300,146 color:#333333
 		text "BUBBLE BOBBLE" at:298,144
+
+		zoom 2
+		sprite "players:@bubblun" at:10,10
+
+		zoom 1
+
+		// repeat count:31 step:{ at:0,32 } {
+		// 	sprite "backgrounds:level1-L" at:48,103
+		// 	sprite "backgrounds:level1-L" at:528,103
+		// }
+
+		sprite "backgrounds:level1-L" at:48,103 range:0,16
+		sprite "backgrounds:level1-L" at:528,103 range:0,16
+
+		// repeat count:32 var:idx step:{ at:16,0 } {
+		// 	sprite "backgrounds:level1-S" at:48,103
+		// }
+
+		sprite "backgrounds:level1-S" at:48,103 range:32,0
+
+		menu {
+			selection {
+				color yellow
+				background #faee005e
+			}
+			items {
+				// text "play" at:300,300 action:{goto("splashscreen")}
+				text "intro" at:300,300 action:{goto("intro")}
+				text "highscores" at:300,360 action:{goto("highscores")}
+				text "DEBUG" at:300,480 action:{goto("debug")}
+			}
+		}
 
 	}
 }

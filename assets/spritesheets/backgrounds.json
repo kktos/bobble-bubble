@@ -1,0 +1,18 @@
+{
+	"img": "level-tiles.png",
+	"sprites": {
+
+		"level1-S": {
+			"scale": 2,
+			"rect": [37,4,8,8]
+		},
+		"level1-L": {
+			"scale": 2,
+			"rect": [72,4,16,16]
+		}
+
+	},
+	"animations": {
+		
+	}
+}

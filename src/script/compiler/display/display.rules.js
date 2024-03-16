@@ -1,5 +1,6 @@
 import { tokens } from "../lexer.js";
 import { layoutRules } from "./layout.rules.js";
+import { timerRules } from "./timer.rules.js";
 import { uiRules } from "./ui.rules.js";
 
 export function displayRules(parser) {
@@ -15,7 +16,7 @@ export function displayRules(parser) {
 		$.CONSUME(tokens.OpenCurly);
 
 		$.MANY(() => {
-			const {name,value}= $.SUBRULE(parser.displayProps);
+			const {name,value}= $.SUBRULE(parser.displayProps, { ARGS: [sheet] });
 			sheet[name] = value;
 		});
 
@@ -24,12 +25,14 @@ export function displayRules(parser) {
 		return sheet;
     });
 
-    $.RULE("displayProps", () => {
+    $.RULE("displayProps", (sheet) => {
 		return $.OR([
 			{ ALT:() => $.SUBRULE(parser.background) },
 			{ ALT:() => $.SUBRULE(parser.showCursor) },
 			{ ALT:() => $.SUBRULE(parser.font) },
 			{ ALT:() => $.SUBRULE(parser.layout) },
+			{ ALT:() => $.SUBRULE(parser.displayTimer, { ARGS: [sheet] }) },
+			{ ALT:() => $.SUBRULE(parser.displayOnEvent, { ARGS: [sheet] }) },
 			{ ALT:() => $.SUBRULE(parser.displayUI) },
 			{ ALT:() => $.SUBRULE(parser.displayLayers) }
 		]);
@@ -53,5 +56,6 @@ export function displayRules(parser) {
 
 	layoutRules(parser);
 	uiRules(parser);
+	timerRules(parser);
 
 }

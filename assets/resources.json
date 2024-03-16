@@ -1,5 +1,10 @@
 {
 	"spritesheets": [
+		"backgrounds.json",
+		"players.json",
+		"bubblun.json",
+		"bobblun.json",
+		"misc.json"
 	],
 	"audiosheets": [
 	],

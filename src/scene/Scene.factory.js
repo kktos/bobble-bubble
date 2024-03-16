@@ -1,5 +1,5 @@
 import ENV from "../env.js";
-import { compileScript } from "../script/compiler.js";
+import { compileScript } from "../script/compiler/compiler.js";
 import { loadJson } from "../utils/loaders.util.js";
 import LocalDB from "../utils/storage.util.js";
 import DisplayScene from "./display.scene.js";

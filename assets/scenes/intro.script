@@ -1,0 +1,52 @@
+display "intro" {
+	background #000
+	showCursor
+	font "bubble-bobble"
+
+	timer "spawner" 2 repeat
+	on "spawner:TIME_OUT" {
+		spawn("BubbleEntity", 300, 300)
+	}
+
+	timer "end" 240
+	on "end:TIME_OUT" {
+		timerStop("spawner")
+	}
+
+	layers {
+		EntitiesLayer
+	}
+
+	layout {
+		align center
+		color #FF0000
+
+		size 2
+		anim "fadein"
+
+		set "strings" [
+			"NOW, IT IS BEGINNING OF A",
+			"FANTASTIC STORY!! LET'S MAKE A",
+			"JOURNEY TO THE CAVE OF MONSTERS!",
+			"GOOD LUCK!"
+		]
+
+		repeat count:4 var:idx step:{ at:0,30 } {
+			text "%strings.$idx%" at:300,80
+		}
+
+		def anim "clockwise" {
+			path { circle(380,300,20) }
+			speed 3
+		}
+		def anim "counter-clockwise" {
+			path { circle(150,300,20) }
+			speed -3
+		}
+
+		zoom 2
+		sprite "bubblun:@in-bobble" at:45,0 anim:"counter-clockwise"
+		sprite "bobblun:@in-bobble" at:0,0 anim:"clockwise"
+
+	}
+}

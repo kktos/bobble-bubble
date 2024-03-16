@@ -20,6 +20,9 @@ export function textRules(parser) {
 		if(options?.color) {
 			result.color= options.color;
 		}
+		if(options?.anim) {
+			result.anim= options.anim;
+		}
 
 		result.pos = $.SUBRULE(parser.parm_at);
 
