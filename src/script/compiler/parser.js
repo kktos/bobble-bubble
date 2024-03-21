@@ -3,32 +3,10 @@ import { debugRules } from "./debug/debug.rules.js";
 import { displayRules } from "./display/display.rules.js";
 import { editorRules } from "./editor/editor.rules.js";
 import { gameRules } from "./game/game.rules.js";
+import { levelRules } from "./level/level.rules.js";
 import { tokenList, tokens } from "./lexer.js";
+import { typesRules } from "./types.rules.js";
 
-/*
-
-displaySheet
-   : displayClause OpenCurly CloseCurly
-
-displayClause
-   : "display" String
-
-fromClause
-   : "FROM" Identifier
-
-whereClause
-   : "WHERE" expression
-
-expression
-   : atomicExpression relationalOperator atomicExpression
-
-atomicExpression
-   : Integer | Identifier
-
-relationalOperator
-   : ">" | "<"
-
- */
 export class SheetParser extends EmbeddedActionsParser {
   constructor() {
     super(tokenList);
@@ -40,13 +18,17 @@ export class SheetParser extends EmbeddedActionsParser {
 		return $.OR([
 			{ ALT:() => $.SUBRULE(this.displaySheet) },
 			{ ALT:() => $.SUBRULE(this.gameSheet) },
+			{ ALT:() => $.SUBRULE(this.levelSheet) },
 			{ ALT:() => $.SUBRULE(this.editorSheet) },
 			{ ALT:() => $.SUBRULE(this.debugSheet) }
 		]);
 	});
 
+	typesRules(this);
+
 	displayRules(this);
 	gameRules(this);
+	levelRules(this);
 	debugRules(this);
 	editorRules(this);
 
@@ -66,23 +48,6 @@ export class SheetParser extends EmbeddedActionsParser {
       $.CONSUME(tokens.Font);
       const value= $.CONSUME(tokens.StringLiteral).payload;
 	  return { name: "font", value };
-    });
-
-	$.RULE("number", () => {
-		const isNegative= $.OPTION(() => $.CONSUME(tokens.Minus));
-
-		const numberStr= $.CONSUME(tokens.Integer).image;
-
-		return Number.parseInt(numberStr) * (isNegative ? -1 : 1);
-	});
-
-    $.RULE("htmlColor", () => {
-		const colorName= () => $.CONSUME(tokens.Identifier).image;
-		const colorHex= () => $.CONSUME(tokens.HexNumber).image;
-		return $.OR([
-			{ ALT: colorHex },
-			{ ALT: colorName }
-		]);
     });
 
     this.performSelfAnalysis();

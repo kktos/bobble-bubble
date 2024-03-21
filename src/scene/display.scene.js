@@ -1,7 +1,6 @@
 import BackgroundLayer from "../layers/background.layer.js";
 import DisplayLayer from "../layers/display.layer.js";
-import { layers } from "../layers/layers.js";
-import { execAction } from "../script/engine/exec.script.js";
+import { layerClasses } from "../layers/layers.js";
 import Scene from "./Scene.js";
 
 let t0;
@@ -19,7 +18,7 @@ export default class DisplayScene extends Scene {
 				if(!layers[layerName])
 					throw new TypeError(`Unknown Layer ${layerName}`);
 
-				this.addLayer( new layers[layerName](gc, this) );
+				this.addLayer( new layerClasses[layerName](gc, this) );
 			}
 		}
 

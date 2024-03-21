@@ -1,7 +1,7 @@
-// import DashboardLayer from "./dashboard.layer.js";
+import DashboardLayer from "./dashboard.layer.js";
 import EntitiesLayer from "./entities.layer";
 
-export const layers= {
-	// DashboardLayer: DashboardLayer
+export const layerClasses= {
+	DashboardLayer,
 	EntitiesLayer
 };

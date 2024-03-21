@@ -2,6 +2,8 @@
 // const rootDir= "./assets";
 const rootDir= "";
 
+const VIEWPORT_RATIO= 387/315;
+
 const ENV= {
 
 	MAIN_FONT: "bubble-bobble",
@@ -35,8 +37,16 @@ const ENV= {
 
 	WALL_TOP: 50,
 
+	// VIEWPORT_WIDTH: 600,
+	// VIEWPORT_HEIGHT: 600,
+	// VIEWPORT_WIDTH: 387*2,
+	// VIEWPORT_HEIGHT: 315*2,
+
+	VIEWPORT_RATIO,
 	VIEWPORT_WIDTH: 600,
-	VIEWPORT_HEIGHT: 600,
+	VIEWPORT_HEIGHT: 600 / VIEWPORT_RATIO,
+	
+	UI_HEIGHT : 200,
 
 	FPS: 1/60
 };

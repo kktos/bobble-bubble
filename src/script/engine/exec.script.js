@@ -1,6 +1,6 @@
 import { SYSTEM, views } from "../../layers/display/views/views.js";
 
-export function execAction(gc, action) {
+export function execAction({gc, vars}, action) {
 
 	let result= undefined;
 
@@ -23,9 +23,9 @@ export function execAction(gc, action) {
 			const varMatches = arg.match(/^\$(.*)$/);
 			if(varMatches) {
 				const varname= varMatches[1];
-				if(!this.vars.has(varname))
+				if(!vars.has(varname))
 					throw new TypeError(`Unknown Variable "${varname}" !?!`);
-				args.push( this.vars.get(varname) );
+				args.push( vars.get(varname) );
 				continue;
 			}
 
@@ -37,7 +37,7 @@ export function execAction(gc, action) {
 		for(let partIdx= 0; partIdx<fnCall.name.length; partIdx++) {
 			const part= fnCall.name[partIdx];
 			if(!self) {
-				self= this.vars.get(part);
+				self= vars.get(part);
 				fn= self;
 			} else {
 				fn= fn[part];

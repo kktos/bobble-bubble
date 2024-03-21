@@ -18,8 +18,6 @@ export default class EntitiesLayer extends Layer {
 	setTaskHandlers() {
 		const scene= this.scene;
 
-		console.log("EntitiesLayer.setTaskHandlers", scene);
-
 		scene.tasks
 			.onTask(EntitiesLayer.TASK_REMOVE_ENTITY, (entity) => {
 				const idx= this.entities.indexOf(entity);

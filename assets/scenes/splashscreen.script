@@ -3,8 +3,7 @@ display "splashscreen" {
 	showCursor
 	font "bubble-bobble"
 
-	timer 6
-
+	timer 120
 	on "TIME_OUT" {
 		goto("intro")
 	}

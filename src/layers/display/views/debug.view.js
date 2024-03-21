@@ -16,7 +16,7 @@ export class DebugView {
 		this.vars.set("frameSprite", "");
 
 		this.rezMgr= this.gc.resourceManager;
-		this.spritesheetList= this.rezMgr.byKind("sprite");
+		this.spritesheetList= [...this.rezMgr.byKind("sprite"), ...this.rezMgr.byKind("font")];
 		
 		this.bkgndIndex= 0;
 		
@@ -33,8 +33,6 @@ export class DebugView {
 		const options= list.map((item, idx) => `<option value="${idx}">${item.replace(/^[^:]+:/,"")}</option>`);
 		const html= `
 			<div class="vcenter hcenter">
-				BACKGROUND
-				<input id="bkgndIndex" type="number" class="w50" value="${this.bkgndIndex}" min="0" max="${BackgroundLayer.SPRITES.length-1}"/>
 				<div class="grid-column vcenter">
 					<div id="btnPrevAnim" class="btn light-shadow">
 						<div class="icn z50 icn-up-arrow"></div>Previous
@@ -187,10 +185,15 @@ export class DebugView {
 
 	setSpritesheet(idx) {
 		this.spritesheetName= this.spritesheetList[idx];
-		this.spritesheet= this.rezMgr.get(this.spritesheetName);
+		if(this.spritesheetName.match(/^font:/)) {
+			const font= this.rezMgr.get(this.spritesheetName);
+			this.spritesheet= font.sprites;
+		} else {
+			this.spritesheet= this.rezMgr.get(this.spritesheetName);
+		}
+
 		this.animations= this.spritesheet.animations;
 		this.sprites= this.spritesheet.sprites;
-
 		this.names= [...this.sprites.keys(), ...this.animations.keys()];
 		this.vars.set("names", this.names);
 
@@ -222,13 +225,14 @@ export class DebugView {
 		this.ctx.clearRect(0, 0, this.width, this.height);
 
 		const name= this.names[this.spriteIndex];
-		const anim= this.animations.get(name);
+		const anim= this.animations?.get(name);
 		if(anim) {
 			this.vars.set("spriteType", "anim");
 			this.vars.set("anim", anim);
 			const step= this.stepAnim ? this.step : gc.tick/100;
 			const frameSprite= anim.frame(step);
 			this.vars.set("frameSprite", frameSprite);
+
 			const frameSpriteSize= this.spritesheet.spriteSize(frameSprite);
 			this.vars.set("frameSpriteSize", frameSpriteSize);
 			// this.spritesheet.draw(frameSprite, this.ctx, this.width-frameSpriteSize.x-50, 50);

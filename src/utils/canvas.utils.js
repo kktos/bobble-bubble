@@ -105,3 +105,19 @@ export function hexToRgb(hex) {
     .substring(1).match(/.{2}/g)
     .map(x => Number.parseInt(x, 16));
 }
+
+export function nameToRgb(name) {
+	// get RGB from named color in div
+	const fakeDiv = document.createElement("div");
+	fakeDiv.style.color = name;
+	document.body.appendChild(fakeDiv);
+  
+	const cs = window.getComputedStyle(fakeDiv);
+	const pv = cs.getPropertyValue("color");
+  
+	document.body.removeChild(fakeDiv);
+  
+	const rgb = pv.substring(4).split(")")[0].split(",");
+  
+	return rgb;
+  }

@@ -5,8 +5,8 @@ import LocalDB from "../utils/storage.util.js";
 import DisplayScene from "./display.scene.js";
 // import DebugScene from "./debug.scene.js";
 // import EditorScene from "./editor.scene.js";
-// import GameScene from "./game.scene.js";
-// import LevelScene from "./level.scene.js";
+import GameScene from "./game.scene.js";
+import LevelScene from "./level.scene.js";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export  default class SceneFactory {
@@ -14,7 +14,7 @@ export  default class SceneFactory {
 	static async load(gc, name) {
 		let sheet= null;
 
-		console.log("SceneFactory.load", name);
+		console.log(`SceneFactory.load "${name}"`);
 
 		gc.wannaPauseOnBlur= true;
 
@@ -30,6 +30,8 @@ export  default class SceneFactory {
 			}
 		}
 
+		// console.log("SceneFactory.load", JSON.stringify(sheet, undefined, 2), sheet);
+
 		let scene;
 		switch(sheet.type) {
 			case "display":
@@ -41,12 +43,12 @@ export  default class SceneFactory {
 			// case "editor":
 			// 	scene= new EditorScene(gc, sheet.name, sheet);
 			// 	break;
-			// case "level":
-			// 	scene= new LevelScene(gc, sheet.name, sheet);
-			// 	break;
-			// case "game":
-			// 	scene= new GameScene(gc, sheet.name, sheet);
-			// 	break;
+			case "level":
+				scene= new LevelScene(gc, sheet.name, sheet);
+				break;
+			case "game":
+				scene= new GameScene(gc, sheet.name, sheet);
+				break;
 			default:
 				throw new Error(`Uknown Scene type: ${sheet.type}`);
 		}

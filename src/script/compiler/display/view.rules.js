@@ -27,16 +27,15 @@ export function viewRules(parser) {
     $.RULE("layoutViewWidth", () => {
 		$.CONSUME(tokens.Width);
 		$.CONSUME(tokens.Colon);
-		return $.SUBRULE(parser.number);
+
+		return $.SUBRULE(parser.numOrVar);
     });
 
     $.RULE("layoutViewHeight", () => {
 		$.CONSUME(tokens.Height);
 		$.CONSUME(tokens.Colon);
-		return $.SUBRULE(parser.number);
+
+		return $.SUBRULE(parser.numOrVar);
     });
 
 }
-/*
-	view "BrickView" at:20,102 width:561 height:272
- */

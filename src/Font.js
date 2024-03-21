@@ -1,6 +1,7 @@
 import SpriteSheet from './Spritesheet.js';
 import ENV from "./env.js";
-import {loadImage, loadJson} from './utils/loaders.util.js';
+import { nameToRgb } from "./utils/canvas.utils.js";
+import { loadImage, loadJson } from './utils/loaders.util.js';
 
 // const CHARS= ' 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ©!-×.';
 export const Align= {
@@ -23,7 +24,7 @@ function loadFont(sheet) {
                 fontSprite.define(char, x, y, sheet.width, sheet.height);
             }
 
-            return new Font(sheet.name, fontSprite, sheet.width);
+            return new Font(sheet.name, fontSprite, sheet.height, sheet.width);
         });
 }
 
@@ -33,22 +34,26 @@ export default class Font {
 					.then(sheet => loadFont(sheet));
 	}
 
-    constructor(name, sprites, size) {
+    constructor(name, sprites, height, width) {
         this.name= name;
         this.sprites= sprites;
-        this.spriteSize= size;
+        this.spriteHeight= height;
+        this.spriteWidth= width;
         this.size= 1;
         this.align= Align.Left;
         this.cache= new Map();
     }
 
     get height() {
-        return this.spriteSize*this.size;
+        return this.spriteHeight * this.size;
+    }
+    get width() {
+        return this.spriteWidth * this.size;
     }
 
     textRect(text, x, y) {
         const str= String(text).toUpperCase();
-        const width= str.length*this.height;
+        const width= str.length * this.width;
         switch(this.align) {
             case Align.Center:
                 x-= width / 2;
@@ -60,24 +65,40 @@ export default class Font {
         return [x, y, x+width, y+this.height];
     }
 
-    print(context, text, x, y, color="#fff") {
+    print(context, text, x, y, color=null) {
         const key= JSON.stringify([text,x,y,color]);
         if(!this.cache.has(key)) {
             const canvas= document.createElement('canvas');
-            const ctx= canvas.getContext('2d');
             const str= String(text).toUpperCase();
     
-            canvas.width= str.length*this.height;
+            canvas.width= str.length * this.width;
             canvas.height= this.height;
     
+            const ctx= canvas.getContext('2d');
             ctx.imageSmoothingEnabled= false;
             [...str].forEach((char, pos) => {
-                    this.sprites.draw(char, ctx, pos * this.height, 0, {zoom: this.size});
+                    this.sprites.draw(char, ctx, pos * this.width, 0, {zoom: this.size});
             });
             
-            ctx.globalCompositeOperation= "source-in";
-            ctx.fillStyle= color;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // if(color) {
+            //     ctx.globalCompositeOperation= "source-in";
+            //     ctx.fillStyle= color;
+            //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // }
+
+            if(color) {
+                const [r, g, b] = nameToRgb(color);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    if(data[i]===255 && data[i]===255 && data[i+2]===255) {
+                        data[i] = r;
+                        data[i + 1] = g;
+                        data[i + 2] = b;
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
 
             this.cache.set(key, canvas);
         }    

@@ -1,5 +1,6 @@
 import ENV from "../env.js";
 import { growRect, ptInRect } from "../math.js";
+import { evalExpr, evalNumber } from "../script/engine/eval.script.js";
 import { execAction } from "../script/engine/exec.script.js";
 import { hexToRgb } from "../utils/canvas.utils.js";
 import {clone} from "../utils/object.util.js";
@@ -39,16 +40,18 @@ export default class DisplayLayer extends UILayer {
 		initViews({gc, vars: this.vars, layer: this});
 
 		this.prepareRendering(gc);
-
+		
 		this.timers= Timers.createTimers(sheet);
 
 		if(sheet.on) {
 			for (const [name, value] of Object.entries(sheet.on)) {
-				const [id, eventName]= name.split(":");
+				const parts= name.split(":");
+				const eventName= parts[parts.length-1];
+				const id= parts.length>1 ? parts[0] : null;
 				parent.events.on(eventName, (...args) => {
-					if(args[0] !== id)
+					if(id && args[0] !== id)
 						return;
-					execAction(gc, value.action);
+					execAction({gc, vars: this.vars}, value.action);
 				});
 			}
 
@@ -69,6 +72,12 @@ export default class DisplayLayer extends UILayer {
 		this.vars.set("player", LocalDB.currentPlayer());
 		this.vars.set("itemIdxSelected", this.itemSelected);
 		this.vars.set("itemSelected", "");
+
+		this.vars.set("clientHeight", ENV.VIEWPORT_HEIGHT);
+		this.vars.set("clientWidth", ENV.VIEWPORT_WIDTH);
+		this.vars.set("centerX", Math.floor(ENV.VIEWPORT_WIDTH/2));
+		this.vars.set("centerY", Math.floor(ENV.VIEWPORT_HEIGHT/2));
+		this.vars.set("centerUIY", Math.floor((this.gc.viewport.bbox.height - ENV.UI_HEIGHT)/2 / this.gc.viewport.ratioHeight));
 	}
 
 	selectMenuItem(idx) {
@@ -157,16 +166,9 @@ export default class DisplayLayer extends UILayer {
 
 	repeat(op, callback) {
 
-		const interpolate= (item) => {
-			switch(item.type) {
-				case "sprite":
-					item.sprite= this.eval(item.sprite);
-					break;
-				case "text":
-					item.text= this.eval(item.text);
-					break;
-			}			
-		};
+		// const evalString= (text) => {
+		// 	return interpolateString({gc: this.gc, vars: this.vars}, text);
+		// };
 
 		for(let idx=0; idx<op.count; idx++) {
 			if(op.var) {
@@ -179,12 +181,19 @@ export default class DisplayLayer extends UILayer {
 				if(item.type === "group") {
 					for (let groupIdx = 0; groupIdx < item.items.length; groupIdx++) {
 						const groupItem= item.items[groupIdx];
-						interpolate(groupItem);
+						evalString(groupItem);
 						groupItem.pos[0]+= idx*op.step.pos[0];
 						groupItem.pos[1]+= idx*op.step.pos[1];
 					}
 				} else {
-					interpolate(item);
+					switch(item.type) {
+						case "text":
+							item.text= evalExpr({gc: this.gc, vars: this.vars}, item.text);
+							break;
+						case "sprite":
+							item.sprite= evalExpr({gc: this.gc, vars: this.vars}, item.sprite);
+							break;
+					}
 					item.pos[0]+= idx*op.step.pos[0];
 					item.pos[1]+= idx*op.step.pos[1];
 				}
@@ -211,7 +220,10 @@ export default class DisplayLayer extends UILayer {
 	}
 
 	prepareRendering(gc) {
-		this.prepareViews(gc);
+		// biome-ignore lint/complexity/noForEach: <explanation>
+		this.layout.filter(op => op.type==="view").forEach(view => {
+			this.vars.set(view.name, null);
+		});
 
 		for(let idx= 0; idx<this.layout.length; idx++) {
 			const op= this.layout[idx];
@@ -221,13 +233,15 @@ export default class DisplayLayer extends UILayer {
 					break;
 				}
 				case "set":
-					this.vars.set(op.name, op.value);
+					this.vars.set(op.name, evalExpr({vars: this.vars}, op.value));
 					break;
 				case "repeat":
 					this.repeat(op, (item)=> this.layout.push(item));
 					break;
 			}
 		}
+
+		this.prepareViews(gc);
 
 		if(this.menu)
 			this.prepareMenu(gc, this.menu);
@@ -242,21 +256,23 @@ export default class DisplayLayer extends UILayer {
 			if(!views[viewDesc.view])
 				throw new TypeError(`Unknown View Type ${viewDesc.view}`);
 
+			const width= evalNumber({vars: this.vars}, viewDesc.width);
+			const height= evalNumber({vars: this.vars}, viewDesc.height);
+			const left= evalNumber({vars: this.vars}, viewDesc.pos[0]);
+			const top= evalNumber({vars: this.vars}, viewDesc.pos[1]);
+
 			const canvas= document.createElement('canvas');
-			canvas.width= viewDesc.width;
-			canvas.height= viewDesc.height;
-			// canvas.style.left= `${viewDesc.pos[0]}px`;
-			// canvas.style.top= `${viewDesc.pos[1]}px`;
-			// canvas.style.right= `${viewDesc.pos[0]+viewDesc.width}px`;
-			// canvas.style.bottom= `${viewDesc.pos[1]+viewDesc.height}px`;
+			canvas.width= width;
+			canvas.height= height;
+
 			const ctx= {canvas, gc, vars: this.vars, layer: this};
 			viewDesc.component= new views[viewDesc.view](ctx);
 			viewDesc.canvas= canvas;
 			viewDesc.bbox= {
-				left: viewDesc.pos[0],
-				top: viewDesc.pos[1],
-				right: viewDesc.width + viewDesc.pos[0],
-				bottom: viewDesc.height + viewDesc.pos[1]
+				left,
+				top,
+				right: width + left,
+				bottom: height + top
 			};
 			this.vars.set(viewDesc.name, viewDesc.component);
 			// const elm= document.body.appendChild(canvas);
@@ -373,48 +389,11 @@ export default class DisplayLayer extends UILayer {
 			return;
 		}
 
-		execAction(gc, menuItem.action);
+		execAction({gc, vars: this.vars}, menuItem.action);
 
 	}
 
-	eval(text) {
-		return text.replace(/%(.+?)%/, (m, varname) => {
-			const [name, ...parms]= varname.split(".");
-			if(!this.vars.has(name)) {
-				throw new TypeError(`unknown var "${name}"`);
-			}
-
-			let value= this.vars.get(name);
-			if(value === undefined) {
-				console.log(`undefined var "${name}"`, varname);
-				return "";
-			}
-
-			for(let parmIdx= 0; parmIdx<parms.length; parmIdx++) {
-				let parm= parms[parmIdx];
-
-				if(parm.match(/^\$/)) {
-					parm= this.vars.get(parm.substr(1));
-				}
-
-				value= value[parm];
-
-				if(value === undefined) {
-					console.log(`undefined var "${parm}"`, varname);
-					return "";
-				}
-
-			}
-			
-			if(value === undefined) {
-				console.log("undefined var", varname);
-				return "";
-			}
-			return value;
-		});
-	}
-
-	renderText({deltaTime, viewport:{ctx}}, op) {
+	renderText(gc, op) {
 		if(op.blink && this.blinkFlag)
 			return;
 		if(op.align)
@@ -431,7 +410,7 @@ export default class DisplayLayer extends UILayer {
 							alpha: 0
 						};
 					}
-					op.anim.state.alpha+= deltaTime/3;
+					op.anim.state.alpha+= gc.deltaTime/3;
 					if(op.anim.state.alpha>255) {
 						op.anim= "none";
 						break;
@@ -441,8 +420,9 @@ export default class DisplayLayer extends UILayer {
 			}
 		}
 
-		const text= this.eval(op.text);
-		return this.font.print(ctx, text===""? " ": text, op.pos[0], op.pos[1], op.color);
+		// const text= interpolateString({gc, vars: this.vars}, op.text);
+		const text= evalExpr({gc, vars: this.vars}, op.text);
+		return this.font.print(gc.viewport.ctx, text===""? " ": text, op.pos[0], op.pos[1], op.color);
 	}
 
 	renderMenu(gc, menu) {
@@ -499,7 +479,12 @@ export default class DisplayLayer extends UILayer {
 
 	renderRect({viewport:{ctx}}, op) {
 		ctx.fillStyle= op.color;
-		ctx.fillRect(op.pos[0], op.pos[1], op.width, op.height);
+		ctx.fillRect(
+			evalNumber({vars: this.vars}, op.pos[0]),
+			evalNumber({vars: this.vars}, op.pos[1]),
+			evalNumber({vars: this.vars}, op.width),
+			evalNumber({vars: this.vars}, op.height)
+		);
 		// ctx.strokeStyle= op.color;
 		// ctx.strokeRect(op.pos[0], op.pos[1], op.width, op.height);
 	}
@@ -509,7 +494,10 @@ export default class DisplayLayer extends UILayer {
 		// gc.viewport.ctx.imageSmoothingEnabled = false;
 		// gc.viewport.ctx.globalAlpha= 1;
 		// gc.viewport.ctx.globalCompositeOperation = "source-over";
-		gc.viewport.ctx.drawImage(op.canvas, op.pos[0], op.pos[1]);
+		const left= evalNumber({vars: this.vars}, op.pos[0]);
+		const top= evalNumber({vars: this.vars}, op.pos[1]);
+
+		gc.viewport.ctx.drawImage(op.canvas, left, top);
 	}
 
 	update(gc, scene) {

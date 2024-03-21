@@ -24,7 +24,7 @@ display "intro" {
 		size 2
 		anim "fadein"
 
-		set "strings" [
+		strings = [
 			"NOW, IT IS BEGINNING OF A",
 			"FANTASTIC STORY!! LET'S MAKE A",
 			"JOURNEY TO THE CAVE OF MONSTERS!",

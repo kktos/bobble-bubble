@@ -1,14 +1,16 @@
 {
 	"spritesheets": [
-		"backgrounds.json",
+		"level-tiles.json",
 		"players.json",
 		"bubblun.json",
 		"bobblun.json",
+		"zen-chan.json",
 		"misc.json"
 	],
 	"audiosheets": [
 	],
 	"fonts": [
-		"bubble-bobble.json"
+		"bubble-bobble.json",
+		"level-numbers.json"
 	]
 }

@@ -9,7 +9,8 @@ export function textRules(parser) {
 
 		const result= {
 			type: "text",
-			text: $.CONSUME(tokens.StringLiteral).payload
+			// text: $.CONSUME(tokens.StringLiteral).payload
+			text: $.SUBRULE(parser.strOrVar)
 		};
 		if(options?.size) {
 			result.size= options.size;
@@ -24,7 +25,7 @@ export function textRules(parser) {
 			result.anim= options.anim;
 		}
 
-		result.pos = $.SUBRULE(parser.parm_at);
+		result.pos = $.SUBRULE2(parser.parm_at);
 
 		$.OPTION(() => {
 			const {name, value, isParm}= $.SUBRULE(parser.textSpriteProps);
@@ -39,7 +40,7 @@ export function textRules(parser) {
 		});
 
 		if(isMenuItem) {
-			result.action= $.SUBRULE(parser.layoutAction);
+			result.action= $.SUBRULE3(parser.layoutAction);
 		}
 
 		return result;

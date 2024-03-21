@@ -69,11 +69,13 @@ const tokenDefs= {
 	Right: {  pattern: "right", longer_alt: "Identifier"},
 	Center: {  pattern: "center", longer_alt: "Identifier"},
 
-	Set: {  pattern: "set", longer_alt: "Identifier"},
+	// Set: {  pattern: "set", longer_alt: "Identifier"},
 	Def: {  pattern: "def", longer_alt: "Identifier"},
 	For: {  pattern: "for", longer_alt: "Identifier"},
 	Repeat: {  pattern: "repeat", longer_alt: "Identifier"},
 	Step: {  pattern: "step", longer_alt: "Identifier"},
+	Eval: {  pattern: "eval", longer_alt: "Identifier"},
+	Settings: {  pattern: "settings", longer_alt: "Identifier"},
 
 	StringLiteral : { pattern: matchStringLiteral, line_breaks: false },
 	Comma : { pattern: "," },
@@ -81,6 +83,7 @@ const tokenDefs= {
 	Minus : { pattern: "-" },
 	Dollar : { pattern: "$" },
 	Colon : { pattern: ":" },
+	Equal : { pattern: "=" },
 	OpenParent : { pattern: "(" },
 	CloseParent : { pattern: ")" },
 	OpenCurly : { pattern: "{" },
@@ -149,11 +152,13 @@ export const tokenList = [
 	tokens.Right,
 	tokens.Center,
 	
-	tokens.Set,
+	// tokens.Set,
 	tokens.Def,
 	tokens.For,
 	tokens.Repeat,
 	tokens.Step,
+	tokens.Eval,
+	tokens.Settings,
 
 	// The Identifier must appear after the keywords because all keywords are valid identifiers.
 	tokens.Identifier,
@@ -163,6 +168,7 @@ export const tokenList = [
 	tokens.Minus,
 	tokens.Dollar,
 	tokens.Colon,
+	tokens.Equal,
 	tokens.OpenCurly,
 	tokens.CloseCurly,
 	tokens.OpenBracket,

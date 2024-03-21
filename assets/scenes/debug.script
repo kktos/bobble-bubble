@@ -12,18 +12,19 @@ display "debug" {
 
 	layout {
 
-		size 2
 
-		set "parms" [
+		parms = [
 			"IDX", "TYPE", "NAME",
 			"FRAMES", "LOOP", "SPEED",
 			"WIDTH", "HEIGHT"
 		]
-		set "values" [
+		values = [
 			"%spriteIndex%", "%spriteType%", "%names.$spriteIndex%",
 			"%anim.frames.length%", "%anim.loopInitialValue%", "%anim.len%",
 			"%frameSpriteSize.x%", "%frameSpriteSize.y%"
 		]
+
+		size 2
 
 		repeat count:7 var:idx step:{ at:0,18 } {
 			text "%parms.$idx%" at:100,18 align:3
@@ -31,17 +32,20 @@ display "debug" {
 		}
 
 		color #777
-		rect at:300,0 width:1 height:600
-		rect at:0,300 width:600 height:1
+		rect at:$centerX,0 width:1 height: $clientHeight
+		rect at:0,$centerUIY width: $clientWidth height:1
 
 		color white
 		size 2
 		align 2
-		text "%frameSprite%" at:300,350
+		text $frameSprite at:300,350
 
-		view "debug" type:DebugView at:100,100 width:400 height:400
+		debugWidth = 400
+		debugHeight = 400
+		debugPosX = eval("$centerX-$debugWidth/2")
+		debugPosY = eval("$centerUIY-$debugHeight/2")
 
-
+		view "debug" type:DebugView at:$debugPosX,$debugPosY width: $debugWidth height: $debugHeight
 
 	}
 }
