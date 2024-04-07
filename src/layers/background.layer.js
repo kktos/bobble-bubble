@@ -1,14 +1,13 @@
-import Layer from "./layer.js";
+import { Layer } from "./Layer.js";
 
-export default class BackgroundLayer extends Layer {
-
+export class BackgroundLayer extends Layer {
 	constructor(gc, parent, color) {
 		super(gc, parent);
-		this.color= color;
+		this.color = color;
 	}
 
-	render({viewport:{ctx, width, height}}) {
-		ctx.fillStyle= this.color;
-		ctx.fillRect(0,0,width, height);
+	render({ viewport: { ctx, width, height } }) {
+		ctx.fillStyle = this.color;
+		ctx.fillRect(0, 0, width, height);
 	}
 }

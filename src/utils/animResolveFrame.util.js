@@ -1,16 +1,14 @@
-
 export default function animResolveFrame(anim, time) {
-	if(anim.isStopped || !anim.loop)
-		return anim.frames[anim.frameIdx];
+	if (anim.isStopped || !anim.loop) return anim.frames[anim.frameIdx];
 
-	const heartbeat= Math.floor(time / anim.len) % anim.frames.length;
-	if(anim.lastHearbeat != heartbeat) {
-		anim.lastHearbeat= heartbeat;
+	const heartbeat = Math.floor(time / anim.len) % anim.frames.length;
+	if (anim.lastHearbeat !== heartbeat) {
+		anim.lastHearbeat = heartbeat;
 		anim.frameIdx++;
-		if(anim.frameIdx == anim.frames.length) {
+		if (anim.frameIdx === anim.frames.length) {
 			anim.loop--;
-			anim.frameIdx= anim.loop ? 0 : anim.frameIdx-1;
-		}		
+			anim.frameIdx = anim.loop ? 0 : anim.frameIdx - 1;
+		}
 	}
 	return anim.frames[anim.frameIdx];
 }

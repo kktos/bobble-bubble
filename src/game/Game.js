@@ -1,26 +1,25 @@
+import { GAME_EVENTS } from "../constants/events.const.js";
+import { GP_BUTTONS, GP_STICKS_AXES } from "../constants/gamepad.const.js";
+import ENV from "../env.js";
+import Director from "../scene/Director.js";
+import { createViewport } from "../utils/canvas.utils.js";
+import { FPSManager } from "./FPSManager.js";
 import ResourceManager from "./ResourceManager.js";
-import { Timer } from "./Timer.js";
-import { GAME_EVENTS } from "./constants/events.const.js";
-import { GP_BUTTONS, GP_STICKS_AXES } from "./constants/gamepad.const.js";
-import ENV from "./env.js";
-import Director from "./scene/Director.js";
-import { createViewport } from "./utils/canvas.utils.js";
 
 class KeyMap {
 	constructor() {
-		this.map= new Map();
+		this.map = new Map();
 	}
 
 	get(key) {
-		if(!this.map.has(key))
-			this.map.set(key, false);
+		if (!this.map.has(key)) this.map.set(key, false);
 		return this.map.get(key);
 	}
 
 	set(key, pressed) {
 		this.map.set(key, pressed);
 	}
-	
+
 	isPressed(key) {
 		return this.get(key) === true;
 	}
@@ -28,66 +27,68 @@ class KeyMap {
 
 export default class Game {
 	constructor(canvas) {
-		this.coppola= null;
+		this.coppola = null;
 
-		this.gc= {
+		this.gc = {
 			viewport: createViewport(canvas),
 
 			resourceManager: null,
 
-			dt: ENV.FPS,
+			dt: 1 / ENV.FPS,
 			tick: 0,
+			deltaTime: 0,
+			totalTime: 0,
 
-			mouse: {x: 0, y: 0, down: false},
+			mouse: { x: 0, y: 0, down: false },
 			gamepad: null,
 			keys: new KeyMap(),
 			scene: null,
 
-			wannaPauseOnBlur: true
+			wannaPauseOnBlur: true,
 		};
 
 		this.gc.viewport.ctx.scale(this.gc.viewport.ratioWidth, this.gc.viewport.ratioHeight);
+		// this.gc.viewport.ctx.scale(this.gc.viewport.ratioWidth,this.gc.viewport.ratioWidth);
 
-		this.timer = new Timer(this.gc.dt);
-		this.timer.update = (deltaTime) => {
+		const onTimerUpdate = (deltaTime) => {
 			this.gc.tick++;
 			this.gc.deltaTime = deltaTime;
+			this.gc.totalTime += deltaTime;
 			this.gc.gamepad && this.readGamepad();
-			this.coppola.update(this.gc);
+			this.coppola?.update(this.gc);
 		};
-		
+		this.fpsManager = new FPSManager(ENV.FPS, onTimerUpdate);
 	}
 
 	pause() {
-		this.timer.stop();
+		this.fpsManager.stop();
 
-		const overlay= document.createElement("div");
-		overlay.className= "overlay";
-		overlay.id= "gamepaused";
-		const msg= document.createElement("div");
-		msg.className= "gamepaused";
-		msg.innerText= "GAME PAUSED";
+		const overlay = document.createElement("div");
+		overlay.className = "overlay";
+		overlay.id = "gamepaused";
+		const msg = document.createElement("div");
+		msg.className = "gamepaused";
+		msg.innerText = "GAME PAUSED";
 		overlay.appendChild(msg);
 		document.body.appendChild(overlay);
 	}
 
 	play() {
-		const overlay= document.querySelector("#gamepaused");
+		const overlay = document.querySelector("#gamepaused");
 		overlay?.remove();
 
-		this.timer.start();
+		this.fpsManager.start();
 	}
 
 	readGamepad() {
-		const gamepad= navigator.getGamepads()[this.gc.gamepad.id];
-		if(gamepad.timestamp === this.gc.gamepad.lastTime)
-			return;
+		const gamepad = navigator.getGamepads()[this.gc.gamepad.id];
+		if (gamepad.timestamp === this.gc.gamepad.lastTime) return;
 
-		this.gc.gamepad.lastTime= gamepad.timestamp;
-		const hMove= gamepad.axes[GP_STICKS_AXES.RIGHT_HORIZONTAL].toFixed(3);
-		const vMove= gamepad.axes[GP_STICKS_AXES.RIGHT_VERTICAL].toFixed(3);
+		this.gc.gamepad.lastTime = gamepad.timestamp;
+		const hMove = gamepad.axes[GP_STICKS_AXES.RIGHT_HORIZONTAL].toFixed(3);
+		const vMove = gamepad.axes[GP_STICKS_AXES.RIGHT_VERTICAL].toFixed(3);
 
-		if(hMove!==0 || vMove!==0)
+		if (hMove !== 0 || vMove !== 0)
 			setTimeout(() => {
 				// const bbox= this.gc.viewport.bbox;
 				// const w= bbox.width/2;
@@ -103,19 +104,18 @@ export default class Game {
 				// this.gc.mouse.y= evt.y;
 				// this.coppola.handleEvent(this.gc, evt);
 
-				const evt= {
+				const evt = {
 					type: "joyaxismove",
 					timestamp: gamepad.timestamp,
 					vertical: vMove,
-					horizontal: hMove
-				};				
+					horizontal: hMove,
+				};
 				this.coppola.handleEvent(this.gc, evt);
-
 			}, 0);
 
-		const buttons= gamepad.buttons;
+		const buttons = gamepad.buttons;
 		setTimeout(() => {
-			const evt= {
+			const evt = {
 				type: "joybuttondown",
 				timestamp: gamepad.timestamp,
 				X: buttons[GP_BUTTONS.X].pressed,
@@ -127,35 +127,33 @@ export default class Game {
 				CURSOR_LEFT: buttons[GP_BUTTONS.CURSOR_LEFT].pressed,
 				CURSOR_RIGHT: buttons[GP_BUTTONS.CURSOR_RIGHT].pressed,
 				TRIGGER_LEFT: buttons[GP_BUTTONS.TRIGGER_LEFT].pressed,
-				TRIGGER_RIGHT: buttons[GP_BUTTONS.TRIGGER_RIGHT].pressed
-			};				
-			this.coppola.handleEvent(this.gc, evt);
-		}, 0);			
+				TRIGGER_RIGHT: buttons[GP_BUTTONS.TRIGGER_RIGHT].pressed,
+			};
+			this.coppola?.handleEvent(this.gc, evt);
+		}, 0);
 	}
 
 	handleEvent(e) {
-		if(!e.isTrusted)
-			return;
+		if (!e.isTrusted) return;
 
-		if(e.srcElement.className === "overlay")
-			return;
-	
+		if (e.srcElement.className === "overlay") return;
+
 		let x;
 		let y;
 
-		if(["touchstart", "touchend", "touchcancel", "touchmove"].includes(e.type)) {
-			const touch= e.touches[0] || e.changedTouches[0];
-			x= touch.pageX;
-			y= touch.pageY;
+		if (["touchstart", "touchend", "touchcancel", "touchmove"].includes(e.type)) {
+			const touch = e.touches[0] || e.changedTouches[0];
+			x = touch.pageX;
+			y = touch.pageY;
 		}
 
-		if(["mousedown", "mouseup", "mousemove", "click"].includes(e.type)) {
-			x= e.clientX;
-			y= e.clientY;	
+		if (["mousedown", "mouseup", "mousemove", "click"].includes(e.type)) {
+			x = e.clientX;
+			y = e.clientY;
 		}
 
-		const bbox= this.gc.viewport.bbox;
-		const evt= {
+		const bbox = this.gc.viewport.bbox;
+		const evt = {
 			type: e.type,
 			buttons: e.buttons,
 			x: ((x - bbox.x) / this.gc.viewport.ratioWidth) | 0,
@@ -164,68 +162,63 @@ export default class Game {
 			// wheel event data
 			deltaX: 0,
 			deltaY: 0,
-			deltaZ: 0
+			deltaZ: 0,
 		};
-	
-		switch(e.type) {
-	
+
+		switch (e.type) {
 			case "wheel":
-				evt.deltaX= e.deltaX;
-				evt.deltaY= e.deltaY;
-				evt.deltaZ= e.deltaZ;
+				evt.deltaX = e.deltaX;
+				evt.deltaY = e.deltaY;
+				evt.deltaZ = e.deltaZ;
 				break;
 
 			case "contextmenu":
 				e.preventDefault();
 				return;
-	
+
 			case "focus":
-				if(this.gc.wannaPauseOnBlur)
-					this.play();
+				if (this.gc.wannaPauseOnBlur) this.play();
 				return;
-	
+
 			case "blur":
-				if(this.gc.wannaPauseOnBlur)
-					this.pause();
+				if (this.gc.wannaPauseOnBlur) this.pause();
 				return;
-	
+
 			case "keyup":
 			case "keydown":
-				evt.key= e.key;
+				evt.key = e.key;
 				this.gc.keys.set(e.key, evt.type === "keydown");
 				break;
-	
+
 			// biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
-			case  "click":
-				if(evt.x>this.gc.viewport.width - 50 && evt.y>this.gc.viewport.height - 50)
-					console.show();
+			case "click":
+				if (evt.x > this.gc.viewport.width - 50 && evt.y > this.gc.viewport.height - 50) console.show();
 			case "mousedown":
 			case "mouseup":
 			case "mousemove": {
-				if(e.target.id !== "game")
-					return;
-				this.gc.mouse.down= evt.type === "mousedown";
-				this.gc.mouse.x= evt.x;
-				this.gc.mouse.y= evt.y;
+				if (e.target.id !== "game") return;
+				this.gc.mouse.down = evt.type === "mousedown";
+				this.gc.mouse.x = evt.x;
+				this.gc.mouse.y = evt.y;
 				break;
 			}
 
 			case "touchmove": {
-				evt.type= "mousemove";
-				this.gc.mouse.x= evt.x;
-				this.gc.mouse.y= evt.y;
+				evt.type = "mousemove";
+				this.gc.mouse.x = evt.x;
+				this.gc.mouse.y = evt.y;
 				break;
 			}
 			case "touchstart": {
-				evt.type= "mousedown";
-				this.gc.mouse.x= evt.x;
-				this.gc.mouse.y= evt.y;
+				evt.type = "mousedown";
+				this.gc.mouse.x = evt.x;
+				this.gc.mouse.y = evt.y;
 				break;
 			}
 			case "touchcancel": {
-				evt.type= "mouseup";
-				this.gc.mouse.x= evt.x;
-				this.gc.mouse.y= evt.y;
+				evt.type = "mouseup";
+				this.gc.mouse.x = evt.x;
+				this.gc.mouse.y = evt.y;
 				break;
 			}
 
@@ -234,37 +227,34 @@ export default class Game {
 				break;
 
 			case "gamepadconnected":
-				this.gc.gamepad= {id: e.gamepad.index, lastTime: 0};
+				this.gc.gamepad = { id: e.gamepad.index, lastTime: 0 };
 				break;
 			case "gamepaddisconnected":
-				this.gc.gamepad= null;
+				this.gc.gamepad = null;
 				break;
-
 		}
-		this.coppola.handleEvent(this.gc, evt);
+		this.coppola?.handleEvent(this.gc, evt);
 	}
-	
-	async start() {
 
-		this.gc.resourceManager= new ResourceManager();
+	async start() {
+		this.gc.resourceManager = new ResourceManager();
 
 		console.log("resourceManager.load");
 		try {
 			await this.gc.resourceManager.load();
-		}
-		catch(err) {
+		} catch (err) {
 			console.error("resourceManager.load", err);
 			throw err;
 		}
 
 		console.log("new Director");
-		this.coppola= new Director(this.gc);
-        this.coppola.run("menu");
+		this.coppola = new Director(this.gc);
+		this.coppola.run("menu");
 
 		for (let idx = 0; idx < GAME_EVENTS.length; idx++) {
 			window.addEventListener(GAME_EVENTS[idx], this);
 		}
-	
+
 		console.log("play()");
 		this.play();
 	}

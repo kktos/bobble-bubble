@@ -1,23 +1,22 @@
 // import LocalDB from "../utils/storage.util.js";
-import Scene from "./Scene.js";
+import { Scene } from "./Scene.js";
 
 export default class GameScene extends Scene {
-
 	constructor(gc, name, sheet) {
 		super(gc, name);
-		this.killOnExit= false;
+		this.killOnExit = false;
 
-		this.currentLevel= 0;
+		this.currentLevel = 1;
 
 		// LocalDB.newPlayer("currentPlayer");
 	}
 
 	update(gc) {
 		super.update(gc);
-		
+
 		this.currentLevel++;
 
-		this.events.emit(Scene.EVENT_COMPLETE, `levels/level${String(this.currentLevel).padStart(3,"0")}`);
+		this.events.emit(Scene.EVENT_COMPLETE, `levels/level${String(this.currentLevel).padStart(3, "0")}`);
 
 		// if(!LocalDB.currentPlayer().lives || this.currentLevel > this.rounds) {
 		// 	this.killOnExit= true;

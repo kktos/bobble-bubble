@@ -2,19 +2,25 @@ display "intro" {
 	background #000
 	showCursor
 	font "bubble-bobble"
+	sound "music:intro"
 
-	timer "spawner" 2 repeat
-	on "spawner:TIME_OUT" {
-		spawn("BubbleEntity", 300, 300)
+	timer "spawner" ms:30 repeat
+	on "TIME_OUT:spawner" {
+		EntityPool.spawn("BubbleEntity")
 	}
 
-	timer "end" 240
-	on "end:TIME_OUT" {
-		timerStop("spawner")
+	timer "end" ms:5000
+	on "TIME_OUT:end" {
+		timer("spawner").stop()
 	}
 
-	layers {
-		EntitiesLayer
+	on SCENE_START {
+		timer("spawner").start()
+		timer("end").start()
+
+		EntityPool.create("BubbleEntity", 100, 300, 300)
+
+		// sound("music:intro").play()
 	}
 
 	layout {
@@ -32,21 +38,26 @@ display "intro" {
 		]
 
 		repeat count:4 var:idx step:{ at:0,30 } {
-			text "%strings.$idx%" at:300,80
+			text $strings.$idx at:300,80
 		}
 
 		def anim "clockwise" {
-			path { circle(380,300,20) }
-			speed 3
+			path { 
+				circle(380,300,20,0)
+				loop()
+			}
+			speed 20
 		}
 		def anim "counter-clockwise" {
-			path { circle(150,300,20) }
-			speed -3
+			path { 
+				circle(150,300,20,180)
+				loop()
+			}
+			speed -20
 		}
 
-		zoom 2
-		sprite "bubblun:@in-bobble" at:45,0 anim:"counter-clockwise"
-		sprite "bobblun:@in-bobble" at:0,0 anim:"clockwise"
+		sprite "BubblunEntity" at:380,300 dir:right anim:"clockwise"
+		sprite "BubblunEntity" at:150,300 dir:left anim:"counter-clockwise"
 
 	}
 }

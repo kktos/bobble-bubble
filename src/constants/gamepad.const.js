@@ -1,12 +1,11 @@
-
-export const GP_STICKS_AXES= {
+export const GP_STICKS_AXES = {
 	LEFT_HORIZONTAL: 0,
 	LEFT_VERTICAL: 1,
 	RIGHT_HORIZONTAL: 2,
-	RIGHT_VERTICAL: 3
+	RIGHT_VERTICAL: 3,
 };
 
-export const GP_BUTTONS= {
+export const GP_BUTTONS = {
 	X: 2,
 	Y: 3,
 	A: 0,
@@ -18,5 +17,5 @@ export const GP_BUTTONS= {
 	TRIGGER_LEFT: 6,
 	TRIGGER_RIGHT: 7,
 	LEFT: 4,
-	RIGHT: 5
+	RIGHT: 5,
 };

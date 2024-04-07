@@ -1,15 +1,16 @@
+import { OP_TYPES } from "../../types/operation.types.js";
 import { tokens } from "../lexer.js";
 
 export function setRules(parser) {
-	const  $ = parser;
+	const $ = parser;
 
-    $.RULE("layoutSet", () => {
+	$.RULE("layoutSet", () => {
 		// $.CONSUME(tokens.Set);
 
-		const result= {
-			type: "set",
+		const result = {
+			type: OP_TYPES.SET,
 			// name: $.CONSUME(tokens.StringLiteral).payload
-			name: $.CONSUME(tokens.Identifier).image
+			name: $.CONSUME(tokens.Identifier).image,
 		};
 
 		$.CONSUME(tokens.Equal);
@@ -17,39 +18,39 @@ export function setRules(parser) {
 		result.value = $.SUBRULE(parser.layoutSetValue);
 
 		return result;
-    });
+	});
 
-    $.RULE("layoutSetValue", () => {
+	$.RULE("layoutSetValue", () => {
 		return $.OR([
 			{ ALT: () => $.CONSUME(tokens.StringLiteral).payload },
 			{ ALT: () => $.SUBRULE(parser.numOrVar) },
 			{ ALT: () => $.SUBRULE(parser.layoutSetValueArray) },
 			{ ALT: () => $.SUBRULE(parser.layoutSetEval) },
 		]);
-    });
-
-    $.RULE("layoutSetEval", () => {
-		$.CONSUME(tokens.Eval);
-		$.CONSUME(tokens.OpenParent);
-		const expr= $.CONSUME(tokens.StringLiteral).payload;
-		$.CONSUME(tokens.CloseParent);
-		return {expr};
 	});
 
-    $.RULE("layoutSetValueArray", () => {
+	$.RULE("layoutSetEval", () => {
+		$.CONSUME(tokens.Eval);
+		$.CONSUME(tokens.OpenParent);
+		const expr = $.CONSUME(tokens.StringLiteral).payload;
+		$.CONSUME(tokens.CloseParent);
+		return { expr };
+	});
+
+	$.RULE("layoutSetValueArray", () => {
 		$.CONSUME(tokens.OpenBracket);
 
-		const result= [];
+		const result = [];
 
 		$.MANY_SEP({
 			SEP: tokens.Comma,
 			DEF: () => {
-				result.push( $.CONSUME(tokens.StringLiteral).payload );
-			}
+				result.push($.CONSUME(tokens.StringLiteral).payload);
+			},
 		});
 
 		$.CONSUME(tokens.CloseBracket);
 
 		return result;
-    });
+	});
 }

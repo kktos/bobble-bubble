@@ -65,7 +65,7 @@
 	"animations": {
 
 		"bobblun": {
-			"len": 0.1,
+			"len": 6,
 			"frames": { "name": "bobblun", "range": [0, 4] }
 		},
 		"bobblun-burp": {

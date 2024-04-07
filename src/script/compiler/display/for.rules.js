@@ -1,52 +1,54 @@
 import { tokens } from "../lexer.js";
 
 export function forRules(parser) {
-	const  $ = parser;
+	const $ = parser;
 
-    $.RULE("layoutFor", (options, isMenuItem) => {
+	$.RULE("layoutFor", (options, isMenuItem) => {
 		$.CONSUME(tokens.For);
 
-		const result= { type: "repeat", step:{pos:[]} }
+		const result = { type: "repeat", step: { pos: [] } };
 
 		$.OPTION(() => {
-			result.var= $.CONSUME(tokens.StringLiteral).payload;
+			result.var = $.CONSUME(tokens.StringLiteral).payload;
 		});
 
-		const range= $.SUBRULE(parser.layoutForTwoNumber);
-		result.count= range[1];
+		const range = $.SUBRULE(parser.layoutForTwoNumber);
+		result.count = range[1];
 
 		$.CONSUME(tokens.OpenCurly);
 
 		$.CONSUME(tokens.Step);
-		result.step.pos= $.SUBRULE2(parser.layoutForTwoNumber);
+		result.step.pos = $.SUBRULE2(parser.layoutForTwoNumber);
 
-		result.items= $.SUBRULE(parser.layoutForItems, { ARGS: [options, isMenuItem] });
+		result.items = $.SUBRULE(parser.layoutForItems, {
+			ARGS: [options, isMenuItem],
+		});
 
 		$.CONSUME(tokens.CloseCurly);
 
 		return result;
-    });
+	});
 
 	$.RULE("layoutForTwoNumber", () => {
-		const a= $.SUBRULE(parser.number);
+		const a = $.SUBRULE(parser.number);
 		$.CONSUME(tokens.Comma);
-		const b= $.SUBRULE2(parser.number);
-		return [a,b];
-    });
+		const b = $.SUBRULE2(parser.number);
+		return [a, b];
+	});
 
 	$.RULE("layoutForItems", (options, isMenuItem) => {
 		$.CONSUME(tokens.Items);
 		$.CONSUME(tokens.OpenCurly);
 
-		const items= [];
+		const items = [];
 		$.AT_LEAST_ONE(() => {
-			items.push( $.SUBRULE(parser.layoutText, { ARGS: [options, isMenuItem] }) );
+			items.push($.SUBRULE(parser.layoutText, { ARGS: [options, isMenuItem] }));
 		});
 
 		$.CONSUME(tokens.CloseCurly);
 
 		return items;
-    });
+	});
 }
 
 /*

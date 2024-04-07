@@ -1,11 +1,9 @@
-
 // const rootDir= "./assets";
-const rootDir= "";
+const rootDir = "";
 
-const VIEWPORT_RATIO= 387/315;
+const VIEWPORT_RATIO = 387 / 315;
 
-const ENV= {
-
+const ENV = {
 	MAIN_FONT: "bubble-bobble",
 
 	SCENES_PATH: "scenes/",
@@ -20,35 +18,32 @@ const ENV= {
 	COLORS: {
 		DEFAULT_TEXT: "white",
 		SELECTED_TEXT: "#ffff07",
-		SELECT_RECT: "#A5A5A5"
+		SELECT_RECT: "#A5A5A5",
+	},
+
+	LEVEL_GRID: {
+		X: 20,
+		Y: 55,
+		COL: 35,
+		ROW: 26,
+		CELL_WIDTH: 16,
+		CELL_HEIGHT: 16,
 	},
 
 	HIGHSCORES_COUNT: 10,
-	
-	BALL_RADIUS: 5,
-
-	PADDLE_X: 300,
-	PADDLE_Y: 550,
-
-	BRICKS_PER_ROW: 17,
-	BRICKS_ROW: 14,
-	BRICK_TOP: 70+16+16,
-	BRICK_LEFT: 20,
-
-	WALL_TOP: 50,
 
 	// VIEWPORT_WIDTH: 600,
 	// VIEWPORT_HEIGHT: 600,
 	// VIEWPORT_WIDTH: 387*2,
 	// VIEWPORT_HEIGHT: 315*2,
 
-	VIEWPORT_RATIO,
+	VIEWPORT_RATIO: 387 / 315,
 	VIEWPORT_WIDTH: 600,
-	VIEWPORT_HEIGHT: 600 / VIEWPORT_RATIO,
-	
-	UI_HEIGHT : 200,
+	VIEWPORT_HEIGHT: 600,
 
-	FPS: 1/60
+	UI_HEIGHT: 200,
+
+	FPS: 60,
 };
 
 export default ENV;

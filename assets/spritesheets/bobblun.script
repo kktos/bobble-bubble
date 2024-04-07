@@ -1,0 +1,52 @@
+spritesheet "bobblun" {
+	image "bobblun.png"
+
+	grid {
+		size 16, 16
+		increment 1, 0
+		offset 1, 0
+	}
+
+	sprite "bobblun" {
+		tiles at:9,14 count:7
+	}
+
+	sprite "bobblun-burp" {
+		tiles at:9,34 count:16
+	}
+
+	sprite "in-bobble" {
+		rects {
+			[134, 181, 30, 32]
+			[169, 181, 30, 32]
+		}
+	}
+
+	sprite "life" {
+		rect [69, 4, 7, 6]
+	}
+
+	sprite "bobblun-death" {
+		tiles at:9, 74 count:6
+		rects {
+			[111, 74, 18, 16]
+			[130, 74, 21, 16]
+			[152, 74, 22, 16]
+		}
+		tiles at:175,74 count:7
+	}
+
+	anim "bobblun" {
+		frames "bobblun" range:0,4
+	}
+	anim "bobblun-burp" {
+		frames "bobblun-burp" range:0,15
+	}
+	anim "bobblun-death" {
+		frames "bobblun-death" range:0,15
+	}
+	anim "in-bobble" {
+		frames "in-bobble" range:0,1
+	}
+
+}

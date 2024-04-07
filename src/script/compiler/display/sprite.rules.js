@@ -1,35 +1,29 @@
+import { OP_TYPES } from "../../types/operation.types.js";
 import { tokens } from "../lexer.js";
 
 export function spriteRules(parser) {
-	const  $ = parser;
+	const $ = parser;
 
-    $.RULE("layoutSprite", (options) => {
+	$.RULE("layoutSprite", (options) => {
 		$.CONSUME(tokens.Sprite);
 
-		const result= {
-			type: "sprite",
-			sprite: $.CONSUME(tokens.StringLiteral).payload
+		const result = {
+			type: OP_TYPES.SPRITE,
+			sprite: $.CONSUME(tokens.StringLiteral).payload,
+			zoom: options?.zoom ?? 1,
+			pos: $.SUBRULE(parser.parm_at),
+			range: undefined,
+			dir: undefined,
 		};
-		if(options?.zoom) {
-			result.zoom= options.zoom;
-		}
-
-		result.pos = $.SUBRULE(parser.parm_at);
 
 		$.OPTION(() => {
 			result.range = $.SUBRULE(parser.parm_range);
 		});
 
+		$.OPTION2(() => {
+			result.dir = $.SUBRULE(parser.parm_dir);
+		});
+
 		return result;
-    });
-
-	$.RULE("parm_range", () => {
-		$.CONSUME(tokens.Range);
-		$.CONSUME(tokens.Colon);
-		const x= $.SUBRULE(parser.number);
-		$.CONSUME(tokens.Comma);
-		const y= $.SUBRULE2(parser.number);
-		return [ x, y ];
 	});
-
 }

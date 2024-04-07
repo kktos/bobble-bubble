@@ -1,25 +1,28 @@
 import "./index.css";
-import "./utils/console.util.js";
+// import "./utils/console.util.js";
 
-console.hide();
+// console.hide();
 
-const canvas= document.getElementById("game");
-canvas.width= window.innerWidth;
-canvas.height= window.innerHeight;
+const canvas = document.getElementById("game");
+if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+	throw new Error("No Canvas game element found !?!");
+}
+
+// canvas.width = window.innerWidth;
+// canvas.height = window.innerHeight;
 
 try {
 	import(
 		/* webpackPrefetch: true */
-		"./Game.js"
+		"./game/Game.js"
 	)
-		.then(m=>m.default)
-		.then(Game => {
-			const game= new Game(canvas);
+		.then((m) => m.default)
+		.then((Game) => {
+			const game = new Game(canvas);
 			game.start();
 		})
-		.catch(err => console.error("IMPORT",err))
-}
-catch(e) {
+		.catch((err) => console.error("IMPORT", err));
+} catch (e) {
 	console.error("EXCEPTION");
 	console.error(e);
 }

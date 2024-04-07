@@ -2,7 +2,7 @@
 	"img": "bubblun.png",
 	"sprites": {
 		"bubblun": {
-			"scale": 1,
+			"scale": 2,
 			"tiles": {
 				"pos": [9, 14],
 				"size": [16, 16],
@@ -66,19 +66,19 @@
 	"animations": {
 
 		"bubblun": {
-			"len": 0.1,
+			"len": 6,
 			"frames": { "name": "bubblun", "range": [0, 4] }
 		},
 		"bubblun-burp": {
-			"len": 0.1,
+			"len": 6,
 			"frames": { "name": "bubblun-burp", "range": [0, 15] }
 		},
 		"bubblun-death": {
-			"len": 0.1,
+			"len": 6,
 			"frames": { "name": "bubblun-death", "range": [0, 15] }
 		},
 		"in-bobble": {
-			"len": 0.1,
+			"len": 6,
 			"frames": { "name": "in-bobble", "range": [0, 1] }
 		}
 

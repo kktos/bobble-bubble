@@ -35,17 +35,17 @@ display "debug" {
 		rect at:$centerX,0 width:1 height: $clientHeight
 		rect at:0,$centerUIY width: $clientWidth height:1
 
-		color white
-		size 2
-		align 2
-		text $frameSprite at:300,350
-
 		debugWidth = 400
 		debugHeight = 400
 		debugPosX = eval("$centerX-$debugWidth/2")
 		debugPosY = eval("$centerUIY-$debugHeight/2")
 
 		view "debug" type:DebugView at:$debugPosX,$debugPosY width: $debugWidth height: $debugHeight
+
+		color white
+		size 2
+		align 2
+		text $frameSprite at:300,350
 
 	}
 }

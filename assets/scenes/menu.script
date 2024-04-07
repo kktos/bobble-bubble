@@ -3,11 +3,31 @@ display "menu" {
 	showCursor
 	font "bubble-bobble"
 
-	// timer "spawner" 1
+	timer "bubble" ms:20 repeat:10
+	on "TIME_OUT:bubble" {
+		spawn("BubbleEntity", $mouseX, $mouseY)
+	}
 
-	// on "TIME_OUT" {
-	// 	spawn("BubbleEntity", 300, 300)
+	// on MENU_ITEM_CLICKED($idx) {
+	// 	goto($menuActions.$idx)
 	// }
+
+	on MENU_ITEM_CLICKED {
+		goto($menuActions.$itemIdxSelected)
+		spawn("BubbleEntity", $mouseX, $mouseY)
+	}
+
+	on MENU_ITEM_SELECTED {
+		timer("bubble").reset()
+	}
+
+	on SCENE_START {
+		sprite(0).set("mass", 0)
+		// sprite(1).set("mass", 0)
+		// sprite(2).set("mass", 0)
+		// spawn("TextEntity", 250, 100, "this is a test")
+		// EntityPool.create("BubbleEntity", 10, 300, 300)
+	}
 
 	layout {
 		align center
@@ -18,24 +38,53 @@ display "menu" {
 		text "BUBBLE BOBBLE" at:300,106 color:#333333
 		text "BUBBLE BOBBLE" at:298,104
 
-		zoom 2
-		sprite "players:@bubblun" at:10,10
+		def anim "toRight" {
+			path { 
+				dir(right)
+				line(1,55,28,520,28)
+				dir(left)
+				line(-1,55,28,520,28)
+				loop()
+			}
+			speed 50
+		}
+		def anim "toLeft" {
+			path { 
+				dir(left)
+				line(-1,55,28,520,28)
+				dir(right)
+				line(1,55,28,520,28)
+				loop()
+			}
+			speed 60
+		}
+		sprite "BubblunEntity" at:90,428 dir:right
+
+		sprite "ZenChanEntity" at:55,28 dir:right anim:"toRight"
+		sprite "ZenChanEntity" at:520,28 dir:left anim:"toLeft"
 
 		zoom 1
+		image "level-tiles:level1-S" at:48,60 range:32,0
+		image "level-tiles:level1-L" at:48,60 range:0,13
+		image "level-tiles:level1-L" at:528,60 range:0,13
+		image "level-tiles:level1-S" at:48,460 range:32,0
 
-		// repeat count:31 step:{ at:0,32 } {
-		// 	sprite "backgrounds:level1-L" at:48,103
-		// 	sprite "backgrounds:level1-L" at:528,103
-		// }
+		zero = 0
 
-		sprite "level-tiles:level1-L" at:48,60 range:0,13
-		sprite "level-tiles:level1-L" at:528,60 range:0,13
-
-		// repeat count:32 var:idx step:{ at:16,0 } {
-		// 	sprite "backgrounds:level1-S" at:48,103
-		// }
-
-		sprite "level-tiles:level1-S" at:48,60 range:32,0
+		menuItems = [
+			"play",
+			"intro",
+			"game",
+			"highscores",
+			"DEBUG"
+		]
+		menuActions = [
+			"splashscreen",
+			"intro",
+			"game",
+			"highscores",
+			"debug"
+		]
 
 		menu {
 			selection {
@@ -43,13 +92,22 @@ display "menu" {
 				background #faee005e
 			}
 			items {
-				// text "play" at:300,300 action:{goto("splashscreen")}
-				text "game" at:300,200 action:{goto("game")}
-
-				text "highscores" at:300,250 action:{goto("highscores")}
-				text "DEBUG" at:300,300 action:{goto("debug")}
+				repeat count:$menuItems.length var:idx step:{ at:0,50 } {				
+					item {
+						text $menuItems.$idx at:300,200
+					}
+				}		
 			}
 		}
+
+		color #FFFFFF50
+		rect at:10,480 width: 580 height:20
+		
+		size 1
+		top = eval("$clientHeight-50")
+		color white
+		align right
+		text "(%mouseX%,%mouseY%) %clientWidth%x%clientHeight%" at:400,490
 
 	}
 }

@@ -1,11 +1,11 @@
 import { tokens } from "../lexer.js";
 
 export function gameRules(parser) {
-	const  $ = parser;
+	const $ = parser;
 
 	$.RULE("gameSheet", () => {
-		const sheet= { type: "game" };
-		sheet.name= $.SUBRULE(parser.gameClause);
+		const sheet = { type: "game" };
+		sheet.name = $.SUBRULE(parser.gameClause);
 
 		$.CONSUME(tokens.OpenCurly);
 
@@ -17,22 +17,21 @@ export function gameRules(parser) {
 		$.CONSUME(tokens.CloseCurly);
 
 		return sheet;
-    });
+	});
 
-    $.RULE("gameClause", () => {
-      $.CONSUME(tokens.Game);
-      return $.CONSUME(tokens.StringLiteral).payload;
-    });
+	$.RULE("gameClause", () => {
+		$.CONSUME(tokens.Game);
+		return $.CONSUME(tokens.StringLiteral).payload;
+	});
 
-    // $.RULE("displayProps", () => {
+	// $.RULE("displayProps", () => {
 	// 	return $.OR([
 	// 		{ ALT:() => $.SUBRULE(parser.background) },
 	// 		{ ALT:() => $.SUBRULE(parser.showCursor) },
 	// 		{ ALT:() => $.SUBRULE(parser.font) },
 	// 		{ ALT:() => $.SUBRULE(parser.layout) }
 	// 	]);
-    // });
+	// });
 
 	// layoutRules(parser);
-
 }

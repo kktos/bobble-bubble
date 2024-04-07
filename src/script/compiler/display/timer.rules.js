@@ -1,29 +1,30 @@
 import { tokens } from "../lexer.js";
 
 export function timerRules(parser) {
-	const  $ = parser;
+	const $ = parser;
 
-    $.RULE("displayTimer", (sheet) => {
+	$.RULE("displayTimer", (sheet) => {
 		$.CONSUME(tokens.Timer);
-		
-		const name= $.OPTION(() => $.CONSUME(tokens.StringLiteral).payload);
-		const time= $.SUBRULE(parser.number);
-		const wannaRepeat= $.OPTION2(() => $.CONSUME(tokens.Repeat));
 
-		const timers= sheet?.timers ? sheet.timers : {};
-		timers[name]= {time, repeat: !!wannaRepeat};
+		const name = $.OPTION(() => $.CONSUME(tokens.StringLiteral).payload);
 
-		return { name:"timers", value: timers };
-    });
+		$.CONSUME(tokens.MS);
+		$.CONSUME(tokens.Colon);
+		const time = $.SUBRULE(parser.number);
 
-    $.RULE("displayOnEvent", (sheet) => {
-		$.CONSUME(tokens.On);
+		const repeatCount = $.OPTION2(() => {
+			let repeat = Number.POSITIVE_INFINITY;
+			$.CONSUME(tokens.Repeat);
+			$.OPTION3(() => {
+				$.CONSUME2(tokens.Colon);
+				repeat = $.SUBRULE2(parser.number);
+			});
+			return repeat;
+		});
 
-		const eventName= $.CONSUME(tokens.StringLiteral).payload;		
-		const handlers= sheet?.on ? sheet.on : {};
-		handlers[eventName]= { action: $.SUBRULE(parser.layoutActionBlock) };
+		const timers = sheet?.timers ? sheet.timers : {};
+		timers[name] = { time, repeat: repeatCount };
 
-		return { name:"on", value: handlers };
-    });
-
+		return { name: "timers", value: timers };
+	});
 }
