@@ -1,0 +1,8 @@
+{
+	"intro": {
+		"sound": "intro.mp3"
+	},
+	"hurry": {
+		"sound": "hurry.mp3"
+	}
+}
