@@ -54,13 +54,14 @@ export default class LocalDB {
 	}
 
 	static highscores() {
-		return JSON.parse(localStorage.getItem("player:highscores")) || [];
+		const scores=localStorage.getItem("player:highscores");
+		return scores ? JSON.parse(scores) : [];
 	}
 
 	static highscore() {
 		const scores = LocalDB.highscores();
 		scores?.sort((a, b) => (a.score < b.score ? 1 : -1));
-		return scores?.[0].score ?? 0;
+		return scores?.[0]?.score ?? 0;
 	}
 
 	static isPlayerScoreGoodEnough() {
