@@ -5,6 +5,7 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 	throw new Error("No Canvas game element found !?!");
 }
 
-import Game from "./game/Game";
+// import Game from "./game/Game";
+import Game from "../../gamer2D/dist/gamer2d";
 const game = new Game(canvas);
-game.start();
+game.start("menu","resources.json");

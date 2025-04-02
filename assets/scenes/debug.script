@@ -12,40 +12,46 @@ display "debug" {
 
 	layout {
 
-
-		parms = [
+		$parms = [
 			"IDX", "TYPE", "NAME",
 			"FRAMES", "LOOP", "SPEED",
 			"WIDTH", "HEIGHT"
 		]
-		values = [
+		$values = [
 			"%spriteIndex%", "%spriteType%", "%names.$spriteIndex%",
 			"%anim.frames.length%", "%anim.loopInitialValue%", "%anim.len%",
 			"%frameSpriteSize.x%", "%frameSpriteSize.y%"
 		]
 
 		size 2
+		color white
 
-		repeat count:7 var:idx step:{ at:0,18 } {
-			text "%parms.$idx%" at:100,18 align:3
-			text "%values.$idx%" at:110,18 align:1
+		// repeat count:8 var:idx step:{ at:0,18 } {
+		// 	text "%parms.$idx%" at:100,18 align:3
+		// 	text "%values.$idx%" at:110,18 align:1
+		// }
+
+		for $idx 0,7 {
+			step 0,18
+			items {
+				text "%parms.$idx%" at:100,18 align:3
+				text "%values.$idx%" at:110,18 align:1	
+			}
 		}
 
 		color #777
 		rect at:$centerX,0 width:1 height: $clientHeight
 		rect at:0,$centerUIY width: $clientWidth height:1
 
-		debugWidth = 400
-		debugHeight = 400
-		debugPosX = eval("$centerX-$debugWidth/2")
-		debugPosY = eval("$centerUIY-$debugHeight/2")
-
+		$debugWidth = 200
+		$debugHeight = 200
+		$debugPosX = eval("$centerX-$debugWidth/2")
+		$debugPosY = eval("$centerUIY-$debugHeight/2")
 		view "debug" type:DebugView at:$debugPosX,$debugPosY width: $debugWidth height: $debugHeight
 
 		color white
 		size 2
 		align 2
-		text $frameSprite at:300,350
-
+		text "%frameSprite%" at:300,350		
 	}
 }

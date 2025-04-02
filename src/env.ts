@@ -18,7 +18,8 @@ const ENV = {
 	COLORS: {
 		DEFAULT_TEXT: "white",
 		SELECTED_TEXT: "#ffff07",
-		SELECT_RECT: "#A5A5A5",
+		// SELECT_RECT: "#A5A5A5",
+		SELECT_RECT: "",
 	},
 
 	LEVEL_GRID: {

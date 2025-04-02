@@ -8,13 +8,8 @@ display "menu" {
 		spawn("BubbleEntity", $mouseX, $mouseY)
 	}
 
-	// on MENU_ITEM_CLICKED($idx) {
-	// 	goto($menuActions.$idx)
-	// }
-
 	on MENU_ITEM_CLICKED {
-		goto($menuActions.$itemIdxSelected)
-		spawn("BubbleEntity", $mouseX, $mouseY)
+		goto($scenes.$selectedIdx)
 	}
 
 	on MENU_ITEM_SELECTED {
@@ -33,6 +28,9 @@ display "menu" {
 		align center
 
 		color white
+		size 1
+		text "BUBBLE BOBBLE" at:$mouseX,$mouseY
+
 
 		size 4
 		text "BUBBLE BOBBLE" at:300,106 color:#333333
@@ -69,16 +67,14 @@ display "menu" {
 		image "level-tiles:level1-L" at:528,60 range:0,13
 		image "level-tiles:level1-S" at:48,460 range:32,0
 
-		zero = 0
-
-		menuItems = [
+		$menuItems = [
 			"play",
 			"intro",
 			"game",
 			"highscores",
 			"DEBUG"
 		]
-		menuActions = [
+		$scenes = [
 			"splashscreen",
 			"intro",
 			"game",
@@ -88,26 +84,46 @@ display "menu" {
 
 		menu {
 			selection {
-				color yellow
+				// color yellow
+				$selectedIdx
 				background #faee005e
 			}
 			items {
-				repeat count:$menuItems.length var:idx step:{ at:0,50 } {				
-					item {
-						text $menuItems.$idx at:300,200
+				// repeat count:$menuItems.length var:idx step:{ at:0,50 } {				
+				// 	item {
+				// 		text $menuItems.$idx at:300,200
+				// 	}
+				// }
+				for $menuItem of $menuItems {
+					step 0,50
+					items {
+						item {text $menuItem at:300,180}
 					}
-				}		
+				}
 			}
 		}
 
-		color #FFFFFF50
-		rect at:10,480 width: 580 height:20
+		// for $idx 0,4 {
+		// 	step 0,50
+		// 	items {
+		// 		text $menuItems.$idx at:300,200
+		// 	}
+		// }
+		
+		// repeat count:5 var:idx step:{ at:0,50 } {				
+		// 	text $menuItems.$idx at:300,200
+		// }
+
+		// color #FFFFFF50
+		// rect at:10,480 width:580 height:20
 		
 		size 1
-		top = eval("$clientHeight-50")
+		$top = eval("$clientHeight-110")
 		color white
-		align right
-		text "(%mouseX%,%mouseY%) %clientWidth%x%clientHeight%" at:400,490
+		align center
+		valign center
+		background #FFFFFF50
+		text "(%mouseX%,%mouseY%) %clientWidth%x%clientHeight%" at:10,$top width:580 height:20
 
 	}
 }
