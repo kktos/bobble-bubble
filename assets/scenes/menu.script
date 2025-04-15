@@ -27,14 +27,28 @@ display "menu" {
 	layout {
 		align center
 
-		color white
+		color #FFF
 		size 1
 		text "BUBBLE BOBBLE" at:$mouseX,$mouseY
 
+		def anim "fade" {
+			path { 
+				prop("text", $strings)
+				prop("color", #00100010)
+				loop()
+			}
+			speed 5
+		}
+
+		$strings = [
+			"BUBBLE BOBBLE",
+			"IS COMING",
+			"TO YOU"
+		]
 
 		size 4
-		text "BUBBLE BOBBLE" at:300,106 color:#333333
-		text "BUBBLE BOBBLE" at:298,104
+		text "" at:300,106 color:#333333 anim:"fade"
+		text "" at:298,104 color:#FFFFFF anim:"fade"
 
 		def anim "toRight" {
 			path { 

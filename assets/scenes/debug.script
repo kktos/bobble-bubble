@@ -34,8 +34,8 @@ display "debug" {
 		for $idx 0,7 {
 			step 0,18
 			items {
-				text "%parms.$idx%" at:100,18 align:3
-				text "%values.$idx%" at:110,18 align:1	
+				text $parms.$idx at:100,18 align:3
+				text $values.$idx at:110,18 align:1	
 			}
 		}
 
@@ -52,6 +52,6 @@ display "debug" {
 		color white
 		size 2
 		align 2
-		text "%frameSprite%" at:300,350		
+		text $frameSprite at:300,350		
 	}
 }

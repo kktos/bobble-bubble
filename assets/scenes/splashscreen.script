@@ -3,7 +3,7 @@ display "splashscreen" {
 	showCursor
 	font "bubble-bobble"
 
-	timer 120
+	timer ms:120
 	on "TIME_OUT" {
 		goto("intro")
 	}
@@ -22,9 +22,9 @@ display "splashscreen" {
 		text "00" at:560,24 align:right
 
 		zoom 2
-		sprite "misc:@logo" at:120,100
+		image "misc:@logo" at:120,100
 
-		sprite "misc:taito" at:230,460
+		image "misc:taito" at:230,460
 
 		size 2
 		text "© TAITO CORPORATION 1986" at:300,520
